@@ -3,7 +3,7 @@ This readme describes how to work with sources. For general and usage info, plea
 [antelle.github.io/io-ui](http://antelle.github.io/io-ui)
 
 ## Warning
-The project is being developed. No builds are available for now.
+The project is being developed.
 
 ## Building
 Prerequisties:
