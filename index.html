@@ -9,12 +9,12 @@
     <link rel="stylesheet" href="css/normalize.css"/>
     <link rel="stylesheet" href="css/style.css"/>
 </head>
-<body>
+<body id="up">
 <div class="fixed">
     <nav class="top-bar" data-topbar role="navigation">
         <ul class="title-area">
             <li class="name">
-                <a href="/" class="logo"></a>
+                <a href="#up" class="logo"></a>
             </li>
             <li class="toggle-topbar menu-icon"><a href="#"><span></span></a></li>
         </ul>
@@ -27,7 +27,7 @@
             <ul class="right">
                 <li><a href="https://github.com/antelle/io-ui">GitHub</a></li>
                 <li><a href="https://github.com/antelle/io-ui/wiki/FAQ">FAQ</a></li>
-                <li><a href="https://github.com/antelle/io-ui/wiki/API">API docs</a></li>
+                <li><a href="https://github.com/antelle/io-ui/wiki/API-docs">API docs</a></li>
                 <li><a href="https://github.com/antelle/io-ui/wiki">Wiki</a></li>
                 <li><a href="https://github.com/antelle/io-ui/issues">Issues</a></li>
                 <li><a href="https://github.com/antelle/io-ui/tree/master/examples">Examples</a></li>
@@ -60,19 +60,20 @@
 
         <h1 id="usage">Usage</h1>
         <ol>
-            <li><a href="TODO">download</a> pre-compiled binaries</li>
+            <li><a href="https://github.com/antelle/io-ui/releases">download</a> pre-compiled binaries</li>
             <li>create your project structure as follows:
                 <ul>
                     <li>main.js <span class="item-descr">&ndash; your app entry point, will be executed in node.js</span></li>
                     <li>package.json <span class="item-descr">&ndash; nothing special, just package.json</span></li>
                     <li>node_modules <span class="item-descr">&ndash; modules as usual; they will be packaged into app</span></li>
-                    <li>app <span class="item-descr">&ndash; app folder, content from it will be run in browser</span></li>
-                    <ul>
-                        <li>index.html <span class="item-descr">&ndash; main html file for browser</span></li>
-                        <li>js/</li>
-                        <li>css/</li>
-                        <li><span class="item-descr">... and other resource folders as in regular web app</span></li>
-                    </ul>
+                    <li>app <span class="item-descr">&ndash; app folder, content from it will be run in browser</span>
+                        <ul>
+                            <li>index.html <span class="item-descr">&ndash; main html file for browser</span></li>
+                            <li>js/</li>
+                            <li>css/</li>
+                            <li><span class="item-descr">... and other resource folders as in regular web app</span></li>
+                        </ul>
+                    </li>
                 </ul>
             </li>
             <li>package the app:<br/>
@@ -89,12 +90,12 @@
         You can find some examples in project <a href="https://github.com/antelle/io-ui/tree/master/examples">source code</a>.<br/>
         Project API is described in detail in <a href="https://github.com/antelle/io-ui/wiki">project wiki on GitHub</a>. Notable wiki pages:
         <ul>
-            <li><a href="#">FAQ</a></li>
-            <li><a href="#">Startup sequence and timings</a></li>
-            <li><a href="#">Minimal requirements</a></li>
-            <li><a href="#">Known issues and limitations</a></li>
-            <li><a href="#">Packaging</a></li>
-            <li><a href="#">Roadmap</a></li>
+            <li><a href="https://github.com/antelle/io-ui/wiki/FAQ">FAQ</a></li>
+            <li><a href="https://github.com/antelle/io-ui/wiki/Startup-sequence-and-timings">Startup sequence and timings</a></li>
+            <li><a href="https://github.com/antelle/io-ui/wiki/Minimal-requirements">Minimal requirements</a></li>
+            <li><a href="https://github.com/antelle/io-ui/wiki/Known-issues-and-limitations">Known issues and limitations</a></li>
+            <li><a href="https://github.com/antelle/io-ui/wiki/Packaging">Packaging</a></li>
+            <li><a href="https://github.com/antelle/io-ui/wiki/Roadmap">Roadmap</a></li>
         </ul>
         Build process is described on <a href="https://github.com/antelle/io-ui">GitHub project home page</a>.
         Please note that typically you want to use pre-compiled binaries instead of building from sources.
