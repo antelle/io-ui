@@ -1,0 +1,136 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>io-ui</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon"/>
+    <link rel="stylesheet" href="css/foundation.min.css"/>
+    <link rel="stylesheet" href="css/normalize.css"/>
+    <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+<div class="fixed">
+    <nav class="top-bar" data-topbar role="navigation">
+        <ul class="title-area">
+            <li class="name">
+                <a href="/" class="logo"></a>
+            </li>
+            <li class="toggle-topbar menu-icon"><a href="#"><span></span></a></li>
+        </ul>
+        <section class="top-bar-section">
+            <ul class="left">
+                <li><a href="#usage">Usage</a></li>
+                <li><a href="#more">More info</a></li>
+                <li><a href="#credits">Credits</a></li>
+            </ul>
+            <ul class="right">
+                <li><a href="https://github.com/antelle/io-ui">GitHub</a></li>
+                <li><a href="https://github.com/antelle/io-ui/wiki/FAQ">FAQ</a></li>
+                <li><a href="https://github.com/antelle/io-ui/wiki/API">API docs</a></li>
+                <li><a href="https://github.com/antelle/io-ui/wiki">Wiki</a></li>
+                <li><a href="https://github.com/antelle/io-ui/issues">Issues</a></li>
+                <li><a href="https://github.com/antelle/io-ui/tree/master/examples">Examples</a></li>
+                <li class="divider"></li>
+                <li class="has-form"><a href="https://github.com/antelle/io-ui/releases" class="button success">Download</a></li>
+            </ul>
+        </section>
+    </nav>
+</div>
+<div class="row full-width">
+    <div class="small-12 columns">
+        <h1 id="top">io-ui <small>allows you to create fast javascript GUI apps with node.js and system browser</small></h1>
+        <p>It generates cross-platform javascript apps built with web technologies, executed with bundled node.js and displayed in system-default browser.
+            There's no need to distribute entire browser engine with the app. It's suitable if you want to create a small app with javascript and your target is modern operating systems.</p>
+
+        <h1>Project status <small>is beta</small></h1>
+        <p>The project is now in active development and can be described as beta version. This website is in progress.</p>
+
+        <h1 id="features">Features <small>include</small></h1>
+        <ul>
+            <li>free and open-source, see <a href="#license">licence</a></li>
+            <li>total app size is about <span class="radius success label">2..3MB</span></li>
+            <li>packaging into single executable</li>
+            <li>node.js included</li>
+            <li>fast start-up, from <span class="radius success label">300ms</span></li>
+            <li>easy configuration</li>
+            <li><span class="not-impl" data-tooltip aria-haspopup="true" title="Will be implemented soon"
+                      >ability to download webkit if OS browser is too old</span></li>
+        </ul>
+
+        <h1 id="usage">Usage</h1>
+        <ol>
+            <li><a href="TODO">download</a> pre-compiled binaries</li>
+            <li>create your project structure as follows:
+                <ul>
+                    <li>main.js <span class="item-descr">&ndash; your app entry point, will be executed in node.js</span></li>
+                    <li>package.json <span class="item-descr">&ndash; nothing special, just package.json</span></li>
+                    <li>node_modules <span class="item-descr">&ndash; modules as usual; they will be packaged into app</span></li>
+                    <li>app <span class="item-descr">&ndash; app folder, content from it will be run in browser</span></li>
+                    <ul>
+                        <li>index.html <span class="item-descr">&ndash; main html file for browser</span></li>
+                        <li>js/</li>
+                        <li>css/</li>
+                        <li><span class="item-descr">... and other resource folders as in regular web app</span></li>
+                    </ul>
+                </ul>
+            </li>
+            <li>package the app:<br/>
+                <code>$ node &lt;path_to_downloaded_binaries&gt;package.js &lt;path_to_app_folder&gt;</code>
+            </li>
+            <li>run the compiled executable, it will be in <code>build</code> folder by default</li>
+            <li>optionally you can run the app without packaging, e.g. for debug: <br/>
+                <code>$ &lt;path_to_downloaded_binaries&gt;bin/&lt;...&gt;/node &lt;path_to_app_folder&gt;</code><br/>
+                please note that executable name depends on your platform, e.g. on windows it will have .exe extension
+            </li>
+        </ol>
+
+        <h2 id="more">More <small>info</small></h2>
+        You can find some examples in project <a href="https://github.com/antelle/io-ui/tree/master/examples">source code</a>.<br/>
+        Project API is described in detail in <a href="https://github.com/antelle/io-ui/wiki">project wiki on GitHub</a>. Notable wiki pages:
+        <ul>
+            <li><a href="#">FAQ</a></li>
+            <li><a href="#">Startup sequence and timings</a></li>
+            <li><a href="#">Minimal requirements</a></li>
+            <li><a href="#">Known issues and limitations</a></li>
+            <li><a href="#">Packaging</a></li>
+            <li><a href="#">Roadmap</a></li>
+        </ul>
+        Build process is described on <a href="https://github.com/antelle/io-ui">GitHub project home page</a>.
+        Please note that typically you want to use pre-compiled binaries instead of building from sources.
+
+        <h1 id="credits">Credits <small>and inspirations</small></h1>
+        <p>The project would not be possible without <a href="https://nodejs.org">node.js</a>.
+            Some ideas have been taken from currently abandoned <a href="https://github.com/appjs/appjs">app.js</a>.<br/>
+            Also thanks to <a href="http://www.codeproject.com/Articles/3365/Embed-an-HTML-control-in-your-own-window-using-pla">Jeff Glatt</a>
+            for a great article about embedding IE on Windows.<br/>
+            Website and source code hosting is provided by <a href="https://github.com">GitHub</a>.<br/>
+        </p>
+
+        <h1 id="name">Note <small>about project name</small></h1>
+        <p>
+            The project is named <code>io-</code> because originally I was planning to use io.js but then found no benefits for this case and switched back to node.js.
+            Maybe sometime it will use io.js again, so having <code>node-</code> in name could be discouraging while IO is a neutral acronym and does not mean a reference to any product.
+        </p>
+
+        <h1 id="alternatives">Alternatives</h1>
+        Apps bundled with node.js and webkit:
+        <ul><li>nw.js</li></ul>
+        Non-crossplatform:
+        <ul>
+        <li>HTA for Windows</li>
+        <li>WinJS for modern Windows</li>
+        </ul>
+
+        <h1 id="license">License</h1>
+        <p>The project is distributed under <a href="https://github.com/antelle/io-ui/blob/master/LICENSE.txt">MIT</a> license.
+        Dependent open-source projects licenses are included.
+        </p>
+    </div>
+</div>
+<script src="js/vendor/modernizr.js"></script>
+<script src="js/vendor/jquery.js"></script>
+<script src="js/foundation.min.js"></script>
+<script src="js/index.js"></script>
+</body>
+</html>

@@ -1,0 +1,1 @@
+build/node examples/demo 2>&1 | grep .

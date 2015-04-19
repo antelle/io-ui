@@ -1,0 +1,12 @@
+.*
+!/.gitignore
+node_modules/
+build/
+deps/
+bower_components/
+dist/
+.DS_Store
+*.log
+*.workspace
+*.project
+*.mk

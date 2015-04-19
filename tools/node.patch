@@ -1,0 +1,315 @@
+diff --git a/common.gypi b/common.gypi
+index 8886b74..118683b 100644
+--- a/common.gypi
++++ b/common.gypi
+@@ -13,7 +13,7 @@
+     'python%': 'python',
+ 
+     # Enable disassembler for `--print-code` v8 options
+-    'v8_enable_disassembler': 1,
++    'v8_enable_disassembler': 0,
+ 
+     # Enable V8's post-mortem debugging only on unix flavors.
+     'conditions': [
+@@ -22,7 +22,7 @@
+         'v8_postmortem_support': 'false'
+       }, {
+         'os_posix': 1,
+-        'v8_postmortem_support': 'true'
++        'v8_postmortem_support': 'false'
+       }],
+       ['GENERATOR == "ninja" or OS== "mac"', {
+         'OBJ_DIR': '<(PRODUCT_DIR)/obj',
+@@ -163,8 +163,8 @@
+           # ... or that C implementations shouldn't use
+           # POSIX names
+           '_CRT_NONSTDC_NO_DEPRECATE',
+-          'BUILDING_V8_SHARED=1',
+-          'BUILDING_UV_SHARED=1',
++          #'BUILDING_V8_SHARED=1',
++          #'BUILDING_UV_SHARED=1',
+         ],
+       }],
+       [ 'OS in "linux freebsd openbsd solaris"', {
+diff --git a/node.gyp b/node.gyp
+index f60b294..da70e72 100644
+--- a/node.gyp
++++ b/node.gyp
+@@ -16,7 +16,7 @@
+     'node_v8_options%': '',
+     'library_files': [
+       'src/node.js',
+-      'lib/_debugger.js',
++      #'lib/_debugger.js',
+       'lib/_linklist.js',
+       'lib/assert.js',
+       'lib/buffer.js',
+@@ -66,7 +66,12 @@
+       'lib/util.js',
+       'lib/vm.js',
+       'lib/zlib.js',
+-      'deps/debugger-agent/lib/_debugger_agent.js',
++      #'deps/debugger-agent/lib/_debugger_agent.js',
++      # ..
++      '../../js/ui.js',
++      '../../js/vfs.js',
++      '../../js/_third_party_main.js',
++      '../../node_modules/node-stream-zip/node_stream_zip.js',
+     ],
+   },
+ 
+@@ -99,7 +104,7 @@
+         'src/node_file.cc',
+         'src/node_http_parser.cc',
+         'src/node_javascript.cc',
+-        'src/node_main.cc',
++        #'src/node_main.cc',
+         'src/node_os.cc',
+         'src/node_v8.cc',
+         'src/node_stat_watcher.cc',
+@@ -157,6 +162,19 @@
+         '<@(library_files)',
+         # node.gyp is added to the project by default.
+         'common.gypi',
++
++        # io-ui
++        '../../src/const.h',
++        '../../src/window-config.cpp',
++        '../../src/window-config.h',
++        '../../src/utf8-string.cpp',
++        '../../src/utf8-string.h',
++        '../../src/perf-trace/perf-trace.cpp',
++        '../../src/perf-trace/perf-trace.h',
++        '../../src/ui-module/ui-module.cpp',
++        '../../src/ui-module/ui-module.h',
++        '../../src/ui-window/ui-window.cpp',
++        '../../src/ui-window/ui-window.h',
+       ],
+ 
+       'defines': [
+@@ -164,7 +182,7 @@
+         'ARCH="<(target_arch)"',
+         'PLATFORM="<(OS)"',
+         'NODE_TAG="<(node_tag)"',
+-        'NODE_V8_OPTIONS="<(node_v8_options)"',
++        'NODE_V8_OPTIONS="<(node_v8_options)"'
+       ],
+ 
+       'conditions': [
+@@ -327,6 +345,10 @@
+         [ 'OS=="win"', {
+           'sources': [
+             'src/res/node.rc',
++            '../../src/os-main/os-main-win.cpp',
++            '../../src/perf-trace/perf-trace-win.cpp',
++            '../../src/ui-module/ui-module-win.cpp',
++            '../../src/ui-window/ui-window-win.cpp',
+           ],
+           'defines': [
+             'FD_SETSIZE=1024',
+@@ -334,14 +356,23 @@
+             'PLATFORM="win32"',
+             '_UNICODE=1',
+           ],
+-          'libraries': [ '-lpsapi.lib' ]
++          'libraries': [ '-lpsapi.lib' ],
++          'link_settings': {
++            'libraries': [
++              'Shlwapi.lib', 'ws2_32.lib', 'advapi32.lib', 'iphlpapi.lib', 'psapi.lib',
++              'shell32.lib', 'winmm.lib', 'Ole32.lib', 'OleAut32.lib', 'Comctl32.lib'
++            ]
++          }
+         }, { # POSIX
+           'defines': [ '__POSIX__' ],
+         }],
+         [ 'OS=="mac"', {
+           # linking Corefoundation is needed since certain OSX debugging tools
+           # like Instruments require it for some features
+-          'libraries': [ '-framework CoreFoundation' ],
++          'libraries': [ '-framework CoreFoundation',
++            '-lobjc', '-framework Foundation', '-framework Cocoa',
++            '-framework WebKit', '-framework JavaScriptCore'
++          ],
+           'defines!': [
+             'PLATFORM="mac"',
+           ],
+@@ -349,6 +380,20 @@
+             # we need to use node's preferred "darwin" rather than gyp's preferred "mac"
+             'PLATFORM="darwin"',
+           ],
++          'sources': [
++            '../../src/os-main/os-main-mac.mm',
++            '../../src/perf-trace/perf-trace-mac.mm',
++            '../../src/ui-module/ui-module-mac.mm',
++            '../../src/ui-window/ui-window-mac.mm'
++          ],
++          'cflags': [ '-m32' ],
++          'ldflags': [ '-m32' ],
++          'xcode_settings': {
++              "OTHER_CFLAGS": ["-ObjC++", "-std=c++11"],
++              "OTHER_LDFLAGS":["-Xlinker -rpath"],
++              "ARCHS": [ "i386" ],
++              "MACOSX_DEPLOYMENT_TARGET": "10.7"
++          }
+         }],
+         [ 'OS=="freebsd"', {
+           'libraries': [
+@@ -370,6 +415,42 @@
+             'PLATFORM="sunos"',
+           ],
+         }],
++        [ 'OS=="linux"', {
++          'sources': [
++            '../../src/os-main/os-main-linux.cpp',
++            '../../src/perf-trace/perf-trace-linux.cpp',
++            '../../src/ui-module/ui-module-linux.cpp',
++            '../../src/ui-window/ui-window-linux.cpp',
++          ],
++          'cflags': [
++            '-std=c++11',
++            '-pthread',
++            '-I/usr/include/gtk-3.0',
++            '-I/usr/include/atk-1.0',
++            '-I/usr/include/at-spi2-atk/2.0',
++            '-I/usr/include/pango-1.0',
++            '-I/usr/include/gio-unix-2.0/',
++            '-I/usr/include/cairo',
++            '-I/usr/include/gdk-pixbuf-2.0',
++            '-I/usr/include/glib-2.0',
++            '-I/usr/lib/x86_64-linux-gnu/glib-2.0/include',
++            '-I/usr/include/harfbuzz',
++            '-I/usr/include/freetype2',
++            '-I/usr/include/pixman-1',
++            '-I/usr/include/libpng12',
++            '-I/usr/include/webkitgtk-3.0',
++            '-I/usr/include/libsoup-2.4',
++            '-I/usr/include/libxml2'
++          ],
++          'ldflags': [ ],
++          'libraries': [
++            '-pthread', '-lgtk-3', '-lgdk-3', '-latk-1.0', '-lgio-2.0', '-lpangoft2-1.0',
++            '-lgdk_pixbuf-2.0', '-lpangocairo-1.0', '-lcairo', '-lpango-1.0', '-lfreetype',
++            '-lfontconfig', '-lgobject-2.0', '-lgmodule-2.0', '-lgthread-2.0',
++            '-lrt', '-lglib-2.0',
++            '-lwebkit2gtk-3.0', '-lsoup-2.4', '-ljavascriptcoregtk-3.0'
++          ]
++        }],
+         [
+           'OS in "linux freebsd" and node_shared_v8=="false"', {
+             'ldflags': [
+@@ -379,13 +460,22 @@
+       ],
+       'msvs_settings': {
+         'VCLinkerTool': {
+-          'SubSystem': 1, # /subsystem:console
++          'SubSystem': 2, # /subsystem:windows
++          'target_conditions': [
++            ['_type=="executable"', {
++              'SubSystem': 2, # windows executable
++            }],
++          ],
+         },
+         'VCManifestTool': {
+           'EmbedManifest': 'true',
+           'AdditionalManifestFiles': 'src/res/node.exe.extra.manifest'
+-        }
++        },
++
+       },
++      'msbuild_configuration_attributes': {
++        'CharacterSet': 1, # CharacterSet:Unicode
++      }
+     },
+     # generate ETW header and resource files
+     {
+diff --git a/src/node.cc b/src/node.cc
+index f0590d5..b3715ab 100644
+--- a/src/node.cc
++++ b/src/node.cc
+@@ -26,6 +26,7 @@
+ #include "node_http_parser.h"
+ #include "node_javascript.h"
+ #include "node_version.h"
++#include "../../../src/perf-trace/perf-trace.h"
+ 
+ #if defined HAVE_PERFCTR
+ #include "node_counters.h"
+@@ -2770,6 +2771,8 @@ void SetupProcessObject(Environment* env,
+   NODE_SET_METHOD(process, "_setupNextTick", SetupNextTick);
+   NODE_SET_METHOD(process, "_setupDomainUse", SetupDomainUse);
+ 
++  NODE_SET_METHOD(process, "perfTraceReg", PerfTrace::RegV8);
++
+   // pre-set _events object for faster emit checks
+   process->Set(env->events_string(), Object::New(env->isolate()));
+ }
+@@ -3691,6 +3694,7 @@ int Start(int argc, char** argv) {
+ 
+   int code;
+   V8::Initialize();
++  PerfTrace::Reg(UI_PERF_EVENT::UI_PERF_EVENT_INIT_V8);
+   node_is_initialized = true;
+   {
+     Locker locker(node_isolate);
+diff --git a/src/res/node.exe.extra.manifest b/src/res/node.exe.extra.manifest
+index c4cc80a..dd9529e 100644
+--- a/src/res/node.exe.extra.manifest
++++ b/src/res/node.exe.extra.manifest
+@@ -1,5 +1,5 @@
+ <?xml version='1.0' encoding='UTF-8' standalone='yes'?>
+-<assembly xmlns='urn:schemas-microsoft-com:asm.v1' manifestVersion='1.0'>
++<assembly xmlns='urn:schemas-microsoft-com:asm.v1' manifestVersion='1.0' xmlns:asmv3='urn:schemas-microsoft-com:asm.v3'>
+   <compatibility xmlns="urn:schemas-microsoft-com:compatibility.v1">
+     <application>
+       <!-- Windows 8.1 -->
+@@ -10,6 +10,24 @@
+       <supportedOS Id="{35138b9a-5d96-4fbd-8e2d-a2440225f93a}"/>
+       <!-- Windows Vista -->
+       <supportedOS Id="{e2011457-1546-43c5-a5fe-008deee3d3f0}"/>
+-  </application>
++    </application>
+   </compatibility>
++  <description>node</description>
++  <dependency>
++    <dependentAssembly>
++      <assemblyIdentity
++        type="win32"
++        name="Microsoft.Windows.Common-Controls"
++        version="6.0.0.0"
++        processorArchitecture="X86"
++        publicKeyToken="6595b64144ccf1df"
++        language="*"
++      />
++    </dependentAssembly>
++  </dependency>
++  <asmv3:application>
++    <asmv3:windowsSettings xmlns="http://schemas.microsoft.com/SMI/2005/WindowsSettings">
++      <dpiAware>true</dpiAware>
++    </asmv3:windowsSettings>
++  </asmv3:application>
+ </assembly>
+diff --git a/src/res/node.rc b/src/res/node.rc
+index 0bdb2a0..31ecaa7 100644
+--- a/src/res/node.rc
++++ b/src/res/node.rc
+@@ -50,14 +50,14 @@ BEGIN
+     BEGIN
+         BLOCK "040904b0"
+         BEGIN
+-            VALUE "CompanyName", "Joyent, Inc"
+-            VALUE "ProductName", "Node.js"
+-            VALUE "FileDescription", "Evented I/O for V8 JavaScript"
++            VALUE "CompanyName", ""
++            VALUE "ProductName", "io-ui"
++            VALUE "FileDescription", ""
+             VALUE "FileVersion", NODE_VERSION_STRING
+             VALUE "ProductVersion", NODE_VERSION_STRING
+-            VALUE "OriginalFilename", "node.exe"
+-            VALUE "InternalName", "node"
+-            VALUE "LegalCopyright", "Copyright Joyent, Inc. and other Node contributors. MIT license."
++            VALUE "OriginalFilename", "io-ui.exe"
++            VALUE "InternalName", "io-ui"
++            VALUE "LegalCopyright", "MIT license"
+         END
+     END
+     BLOCK "VarFileInfo"

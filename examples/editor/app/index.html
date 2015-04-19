@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html style="height: 100%;">
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta charset="UTF-8">
+        <title>Editor</title>
+    </head>
+    <body style="">
+        <div id="editor" style="position: absolute; top: 0; right: 0; bottom: 0; left: 0;">// enter some code and hit F5 to run. you can test window methods here
+app.window.frame = !app.window.frame;</div>
+        <script src="bower_components/jquery/dist/jquery.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="bower_components/ace-builds/src-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
+        <script>
+            var editor = ace.edit("editor");
+            editor.setTheme("ace/theme/monokai");
+            editor.setPrintMarginColumn(-1);
+            editor.getSession().setMode("ace/mode/javascript");
+            editor.commands.addCommand({ name: 'run', bindKey: {win: 'F5',  mac: 'F5'},
+                exec: function(editor) {
+                    editor.setReadOnly(true);
+                    var code = editor.getValue();
+                    $.ajax({
+                        method: 'POST',
+                        url: '/exec',
+                        data: { code: code },
+                        dataType: 'text',
+                        success: function(res) {
+                            setResult('result: ' + res);
+                        },
+                        error: function(xhr, status, err) {
+                            setResult('error: ' + err);
+                        }
+                    })
+                },
+                readOnly: false
+            });
+            editor.focus();
+
+            function setResult(res) {
+                var code = editor.getValue().replace(/\n\n\/\/[^\n]+$/, '');
+                editor.setReadOnly(false);
+                editor.setValue(code + '\n\n// ' + res.replace(/\n/g, '\n// '));
+                editor.clearSelection();
+                editor.navigateFileEnd();
+            }
+        </script>
+    </body>
+</html>

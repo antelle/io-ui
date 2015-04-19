@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html style="height: 100%;">
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta charset="UTF-8">
+        <title>&nbsp;</title>
+        <link rel="stylesheet" href="style.css" type="text/css" />
+        <style type="text/css">
+        </style>
+    </head>
+    <body>
+        This is page2. <a href="index.html">go back</a>
+        <script>
+window.addEventListener('keydown', function (e) {
+    if (e.keyIdentifier === 'U+0008' || e.keyIdentifier === 'Backspace' || e.keyCode === '8' || document.activeElement !== 'text') {
+        if (e.target === document.body) {
+            e.preventDefault();
+        }
+    }
+}, true);
+        </script>
+    </body>
+</html>
