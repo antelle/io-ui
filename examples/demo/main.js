@@ -21,6 +21,8 @@ var app = ui.run({
         opacity: 1,
         state: ui.Window.STATE_NORMAL,
         menu: [{
+            title: '&Edit'
+        }, {
             title: '&My menu',
             items: [
                 { title: '&Hello' },

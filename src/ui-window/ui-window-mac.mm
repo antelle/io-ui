@@ -39,6 +39,7 @@ public:
 private:
     WindowRect _rect;
     void AddMenu(UiMenu* menu, NSMenu* parentMenu);
+    static void AddStandardEditMenu(NSMenu* editMenu);
 };
 
 @interface IoUiWindow : NSWindow
@@ -431,7 +432,7 @@ void UiWindowMac::MsgCallback(void* callback, Utf8String* result, Utf8String* er
 
 void UiWindowMac::CreateWindowMenu() {
     // https://developer.apple.com/library/mac/documentation/UserExperience/Conceptual/OSXHIGuidelines/MenuBarMenus.html
-    if (_config->Menu && _isMainWindow) {
+    if (_isMainWindow) {
         id appName = [[NSProcessInfo processInfo] processName];
 
         id appMenu = [[NSMenu alloc] init];
@@ -449,33 +450,15 @@ void UiWindowMac::CreateWindowMenu() {
         [appMenu addItem:[NSMenuItem separatorItem]];
         [appMenu addItem:[[IoUiMenuItem alloc] initWithTitle:[@"Quit " stringByAppendingString:appName]
             action:@selector(terminate:) keyEquivalent:@"q"]];
-
-        id editMenu = [[NSMenu alloc] initWithTitle:@"Edit"];
-        [editMenu addItem:[[IoUiMenuItem alloc] initWithTitle:@"Undo"
-            action:@selector(undo:) keyEquivalent:@"z"]];
-        item = [[IoUiMenuItem alloc] initWithTitle:@"Redo"
-            action:@selector(redo:) keyEquivalent:@"z"];
-        [item setKeyEquivalentModifierMask:NSCommandKeyMask | NSShiftKeyMask];
-        [editMenu addItem:item];
-        [editMenu addItem:[NSMenuItem separatorItem]];
-        [editMenu addItem:[[IoUiMenuItem alloc] initWithTitle:@"Cut"
-            action:@selector(cut:) keyEquivalent:@"x"]];
-        [editMenu addItem:[[IoUiMenuItem alloc] initWithTitle:@"Copy"
-            action:@selector(copy:) keyEquivalent:@"c"]];
-        [editMenu addItem:[[IoUiMenuItem alloc] initWithTitle:@"Paste"
-            action:@selector(paste:) keyEquivalent:@"v"]];
-        [editMenu addItem:[[IoUiMenuItem alloc] initWithTitle:@"Select All"
-            action:@selector(selectAll:) keyEquivalent:@"a"]];
-
+        
         NSMenu* menubar = [[NSMenu alloc] init];
         id appMenuItem = [[NSMenuItem alloc] init];
         [appMenuItem setSubmenu:appMenu];
         [menubar addItem:appMenuItem];
-        id editMenuItem = [[NSMenuItem alloc] initWithTitle:@"Edit" action:NULL keyEquivalent:@""];
-        [editMenuItem setSubmenu:editMenu];
-        [menubar addItem:editMenuItem];
-
-        AddMenu(_config->Menu, menubar);
+        
+        if (_config->Menu) {
+            AddMenu(_config->Menu, menubar);
+        }
 
         [NSApp setMainMenu:menubar];
     }
@@ -493,25 +476,55 @@ void UiWindowMac::AddMenu(UiMenu* menu, NSMenu* parentMenu) {
             keyEquivalent = [title substringWithRange:range];
             title = [title stringByReplacingOccurrencesOfString:@"&" withString:@""];
         }
-        if (menu->Type == MENU_TYPE::MENU_TYPE_SIMPLE && menu->Items) {
+        bool isEdit = [title isEqualToString:@"Edit"];
+        if ((menu->Type == MENU_TYPE::MENU_TYPE_SIMPLE && menu->Items) || isEdit) {
             NSMenu* subMenu = [[NSMenu alloc] initWithTitle:title];
             NSMenuItem* item = [[NSMenuItem alloc] initWithTitle:title
                 action:nil keyEquivalent:keyEquivalent];
-            AddMenu(menu->Items, subMenu);
+            if (isEdit) {
+                AddStandardEditMenu(subMenu);
+            }
+            if (menu->Items) {
+                if (isEdit) {
+                    [subMenu addItem:[NSMenuItem separatorItem]];
+                }
+                AddMenu(menu->Items, subMenu);
+            }
             [item setSubmenu:subMenu];
             [parentMenu addItem:item];
         }
         else {
-            IoUiMenuItem* item = [[IoUiMenuItem alloc] initWithTitle:title
-                action:@selector(menuItemHit:) keyEquivalent:keyEquivalent];
-            [item setTarget:_window.delegate];
-            item.uiMenu = menu;
-            [parentMenu addItem:item];
+            NSMenuItem* existingMenuItem = [parentMenu itemWithTitle:title];
+            if (!existingMenuItem) {
+                IoUiMenuItem* item = [[IoUiMenuItem alloc] initWithTitle:title
+                    action:@selector(menuItemHit:) keyEquivalent:keyEquivalent];
+                [item setTarget:_window.delegate];
+                item.uiMenu = menu;
+                [parentMenu addItem:item];
+            }
         }
     }
     if (menu->Next) {
         AddMenu(menu->Next, parentMenu);
     }
+}
+
+void UiWindowMac::AddStandardEditMenu(NSMenu* editMenu) {
+    [editMenu addItem:[[IoUiMenuItem alloc] initWithTitle:@"Undo"
+                                                   action:@selector(undo) keyEquivalent:@"z"]];
+    auto item = [[IoUiMenuItem alloc] initWithTitle:@"Redo"
+                                        action:@selector(redo) keyEquivalent:@"z"];
+    [item setKeyEquivalentModifierMask:NSCommandKeyMask | NSShiftKeyMask];
+    [editMenu addItem:item];
+    [editMenu addItem:[NSMenuItem separatorItem]];
+    [editMenu addItem:[[IoUiMenuItem alloc] initWithTitle:@"Cut"
+                                                   action:@selector(cut:) keyEquivalent:@"x"]];
+    [editMenu addItem:[[IoUiMenuItem alloc] initWithTitle:@"Copy"
+                                                   action:@selector(copy:) keyEquivalent:@"c"]];
+    [editMenu addItem:[[IoUiMenuItem alloc] initWithTitle:@"Paste"
+                                                   action:@selector(paste:) keyEquivalent:@"v"]];
+    [editMenu addItem:[[IoUiMenuItem alloc] initWithTitle:@"Select All"
+                                                   action:@selector(selectAll:) keyEquivalent:@"a"]];
 }
 
 WindowRect UiWindowMac::GetWindowRect() {
