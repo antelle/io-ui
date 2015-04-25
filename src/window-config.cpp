@@ -88,6 +88,11 @@ UiMenu* WindowConfig::ParseMenu(Isolate* isolate, Handle<Array> arr) {
         auto items = item->Get(String::NewFromUtf8(isolate, "items"));
         if (items->IsArray())
             current->Items = ParseMenu(isolate, Handle<Array>::Cast(items));
+        auto curItem = current->Items;
+        while (curItem) {
+            curItem->Parent = current;
+            curItem = curItem->Next;
+        }
     }
     return result;
 }

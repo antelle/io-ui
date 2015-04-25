@@ -327,6 +327,11 @@ private:
 
     void CreateWindowMenu();
     void AddMenu(UiMenu* menu, HMENU parent);
+    void AddFileMenuItems(HMENU parent, bool hasItems);
+    void AddEditMenuItems(HMENU parent, bool hasItems);
+    void AddHelpMenuItems(HMENU parent, bool hasItems);
+    void HandleInternalMenu(MENU_INTL menu);
+
     UI_RESULT ExecScript(WCHAR* script, LPVARIANT ret = NULL, LPEXCEPINFO ex = NULL);
 };
 
@@ -925,7 +930,11 @@ BOOL UiWindowWin::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
         mii.fMask = MIIM_DATA;
         mii.cbSize = sizeof(mii);
         if (GetMenuItemInfo(hMenu, ix, TRUE, &mii) && mii.dwItemData) {
+            UiMenu* uiMenu = (UiMenu*)mii.dwItemData;
             EmitEvent(new WindowEventData(WINDOW_EVENT_MENU, mii.dwItemData));
+            if (uiMenu && uiMenu->InternalMenuId > 0) {
+                HandleInternalMenu(uiMenu->InternalMenuId);
+            }
             return TRUE;
         }
         return FALSE;
@@ -1218,10 +1227,15 @@ void UiWindowWin::CreateWindowMenu() {
 }
 
 void UiWindowWin::AddMenu(UiMenu* menu, HMENU parent) {
+    bool isFileMenu = !menu->Parent && menu->Title && (!lstrcmpi(*menu->Title, L"File") || !lstrcmpi(*menu->Title, L"&File"));
+    bool isEditMenu = !menu->Parent && menu->Title && (!lstrcmpi(*menu->Title, L"Edit") || !lstrcmpi(*menu->Title, L"&Edit"));
+    bool isHelpMenu = !menu->Parent && menu->Title && (!lstrcmpi(*menu->Title, L"Help") || !lstrcmpi(*menu->Title, L"&Help")
+        || !lstrcmpi(*menu->Title, L"?") || !lstrcmpi(*menu->Title, L"&?"));
+    bool isStandardMenu = isFileMenu || isEditMenu || isHelpMenu;
     if (menu->Type == MENU_TYPE::MENU_TYPE_SEPARATOR) {
         AppendMenu(parent, MF_SEPARATOR, NULL, NULL);
     }
-    else if (menu->Type == MENU_TYPE::MENU_TYPE_SIMPLE && menu->Items) {
+    else if (isStandardMenu || ((menu->Type == MENU_TYPE::MENU_TYPE_SIMPLE) && menu->Items)) {
         HMENU popupMenu = CreatePopupMenu();
         AppendMenu(parent, MF_STRING | MF_POPUP, (UINT_PTR)popupMenu, *menu->Title);
         MENUINFO mi = { 0 };
@@ -1229,7 +1243,18 @@ void UiWindowWin::AddMenu(UiMenu* menu, HMENU parent) {
         mi.fMask = MIM_STYLE;
         mi.dwStyle = MNS_NOTIFYBYPOS;
         SetMenuInfo(popupMenu, &mi);
-        AddMenu(menu->Items, popupMenu);
+        if (isEditMenu) {
+            AddEditMenuItems(popupMenu, menu->Items != NULL);
+        }
+        if (menu->Items) {
+            AddMenu(menu->Items, popupMenu);
+        }
+        if (isHelpMenu) {
+            AddHelpMenuItems(popupMenu, menu->Items != NULL);
+        }
+        if (isFileMenu) {
+            AddFileMenuItems(popupMenu, menu->Items != NULL);
+        }
     }
     else {
         MENUITEMINFO info = { 0 };
@@ -1242,6 +1267,59 @@ void UiWindowWin::AddMenu(UiMenu* menu, HMENU parent) {
     }
     if (menu->Next) {
         AddMenu(menu->Next, parent);
+    }
+}
+
+void UiWindowWin::AddFileMenuItems(HMENU parent, bool hasItems) {
+    if (hasItems)
+        AddMenu(new UiMenu(MENU_TYPE_SEPARATOR), parent);
+    AddMenu(new UiMenu(new Utf8String(L"E&xit"), MENU_INTL_FILE_EXIT), parent);
+}
+
+void UiWindowWin::AddEditMenuItems(HMENU parent, bool hasItems) {
+    AddMenu(new UiMenu(new Utf8String(L"&Undo"), MENU_INTL_EDIT_UNDO), parent);
+    AddMenu(new UiMenu(new Utf8String(L"&Redo"), MENU_INTL_EDIT_REDO), parent);
+    AddMenu(new UiMenu(MENU_TYPE_SEPARATOR), parent);
+    AddMenu(new UiMenu(new Utf8String(L"Cu&t"), MENU_INTL_EDIT_CUT), parent);
+    AddMenu(new UiMenu(new Utf8String(L"&Copy"), MENU_INTL_EDIT_COPY), parent);
+    AddMenu(new UiMenu(new Utf8String(L"&Paste"), MENU_INTL_EDIT_PASTE), parent);
+    AddMenu(new UiMenu(MENU_TYPE_SEPARATOR), parent);
+    AddMenu(new UiMenu(new Utf8String(L"Select &All"), MENU_INTL_EDIT_SELECT_ALL), parent);
+    if (hasItems)
+        AddMenu(new UiMenu(MENU_TYPE_SEPARATOR), parent);
+}
+
+void UiWindowWin::AddHelpMenuItems(HMENU parent, bool hasItems) {
+    if (hasItems)
+        AddMenu(new UiMenu(MENU_TYPE_SEPARATOR), parent);
+    AddMenu(new UiMenu(new Utf8String(L"&About"), MENU_INTL_HELP_ABOUT), parent);
+}
+
+void UiWindowWin::HandleInternalMenu(MENU_INTL menu) {
+    switch (menu) {
+    case MENU_INTL_FILE_EXIT:
+        Close();
+        break;
+    case MENU_INTL_EDIT_UNDO:
+        _webBrowser->ExecWB(OLECMDID_UNDO, OLECMDEXECOPT_DODEFAULT, NULL, NULL);
+        break;
+    case MENU_INTL_EDIT_REDO:
+        _webBrowser->ExecWB(OLECMDID_REDO, OLECMDEXECOPT_DODEFAULT, NULL, NULL);
+        break;
+    case MENU_INTL_EDIT_CUT:
+        _webBrowser->ExecWB(OLECMDID_CUT, OLECMDEXECOPT_DODEFAULT, NULL, NULL);
+        break;
+    case MENU_INTL_EDIT_COPY:
+        _webBrowser->ExecWB(OLECMDID_COPY, OLECMDEXECOPT_DODEFAULT, NULL, NULL);
+        break;
+    case MENU_INTL_EDIT_PASTE:
+        _webBrowser->ExecWB(OLECMDID_PASTE, OLECMDEXECOPT_DODEFAULT, NULL, NULL);
+        break;
+    case MENU_INTL_EDIT_SELECT_ALL:
+        _webBrowser->ExecWB(OLECMDID_SELECTALL, OLECMDEXECOPT_DODEFAULT, NULL, NULL);
+        break;
+    case MENU_INTL_HELP_ABOUT:
+        break;
     }
 }
 

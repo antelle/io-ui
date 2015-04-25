@@ -17,6 +17,18 @@ struct Coord {
     }
 };
 
+enum MENU_INTL : int {
+    MENU_INTL_NULL = 0,
+    MENU_INTL_FILE_EXIT = 10,
+    MENU_INTL_EDIT_UNDO = 20,
+    MENU_INTL_EDIT_REDO = 21,
+    MENU_INTL_EDIT_CUT = 22,
+    MENU_INTL_EDIT_COPY = 23,
+    MENU_INTL_EDIT_PASTE = 24,
+    MENU_INTL_EDIT_SELECT_ALL = 25,
+    MENU_INTL_HELP_ABOUT = 30
+};
+
 struct UiMenu {
     MENU_TYPE Type = MENU_TYPE::MENU_TYPE_SIMPLE;
     Utf8String* Id = NULL;
@@ -24,6 +36,13 @@ struct UiMenu {
     v8::Persistent<v8::Function> Callback;
     UiMenu* Items = NULL;
     UiMenu* Next = NULL;
+    UiMenu* Parent = NULL;
+    enum MENU_INTL InternalMenuId = MENU_INTL_NULL;
+
+    UiMenu() {}
+    UiMenu(MENU_TYPE type) : Type(type) { }
+    UiMenu(Utf8String* title) : Title(title) {}
+    UiMenu(Utf8String* title, MENU_INTL internalMenuId) : Title(title), InternalMenuId(internalMenuId) {}
 
     ~UiMenu() {
         if (Title)
