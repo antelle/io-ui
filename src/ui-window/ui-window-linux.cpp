@@ -61,6 +61,10 @@ private:
     static gboolean MsgCallbackSync(gpointer arg);
 
     void AddMenu(UiMenu* menu, GtkWidget* parentMenu);
+    void AddFileMenuItems(GtkWidget* parent, bool hasItems);
+    void AddEditMenuItems(GtkWidget* parent, bool hasItems);
+    void AddHelpMenuItems(GtkWidget* parent, bool hasItems);
+    void HandleInternalMenu(MENU_INTL menu);
 };
 
 struct PostMsgArg {
@@ -399,6 +403,11 @@ gboolean UiWindowLinux::MsgCallbackSync(gpointer data) {
 }
 
 void UiWindowLinux::AddMenu(UiMenu* menu, GtkWidget* parentMenu) {
+    bool isFileMenu = !menu->Parent && menu->Title && (!strcmp(*menu->Title, "File") || !strcmp(*menu->Title, "&File"));
+    bool isEditMenu = !menu->Parent && menu->Title && (!strcmp(*menu->Title, "Edit") || !strcmp(*menu->Title, "&Edit"));
+    bool isHelpMenu = !menu->Parent && menu->Title && (!strcmp(*menu->Title, "Help") || !strcmp(*menu->Title, "&Help")
+        || !strcmp(*menu->Title, "?") || !strcmp(*menu->Title, "&?"));
+    bool isStandardMenu = isFileMenu || isEditMenu || isHelpMenu;
     char* label = menu->Title ? (char*)*menu->Title : (char*)"";
     if (label) {
         for (int i = strlen(label); i >= 0; --i) {
@@ -410,12 +419,23 @@ void UiWindowLinux::AddMenu(UiMenu* menu, GtkWidget* parentMenu) {
         auto item = gtk_separator_menu_item_new();
         gtk_menu_shell_append(GTK_MENU_SHELL(parentMenu), item);
     }
-    else if (menu->Type == MENU_TYPE::MENU_TYPE_SIMPLE && menu->Items) {
+    else if (isStandardMenu || (menu->Type == MENU_TYPE::MENU_TYPE_SIMPLE && menu->Items)) {
         auto itemMenu = gtk_menu_new();
         auto item = gtk_menu_item_new_with_mnemonic(label);
         gtk_menu_item_set_submenu(GTK_MENU_ITEM(item), itemMenu);
         gtk_menu_shell_append(GTK_MENU_SHELL(parentMenu), item);
-        AddMenu(menu->Items, itemMenu);
+        if (isEditMenu) {
+            AddEditMenuItems(itemMenu, menu->Items != NULL);
+        }
+        if (menu->Items) {
+            AddMenu(menu->Items, itemMenu);
+        }
+        if (isHelpMenu) {
+            AddHelpMenuItems(itemMenu, menu->Items != NULL);
+        }
+        if (isFileMenu) {
+            AddFileMenuItems(itemMenu, menu->Items != NULL);
+        }
     }
     else {
         auto item = gtk_menu_item_new_with_mnemonic(label);
@@ -428,10 +448,68 @@ void UiWindowLinux::AddMenu(UiMenu* menu, GtkWidget* parentMenu) {
     }
 }
 
+void UiWindowLinux::AddFileMenuItems(GtkWidget* parent, bool hasItems) {
+    if (hasItems)
+        AddMenu(new UiMenu(MENU_TYPE_SEPARATOR), parent);
+    AddMenu(new UiMenu(new Utf8String("&Quit"), MENU_INTL_FILE_EXIT), parent);
+}
+
+void UiWindowLinux::AddEditMenuItems(GtkWidget* parent, bool hasItems) {
+    AddMenu(new UiMenu(new Utf8String("&Undo"), MENU_INTL_EDIT_UNDO), parent);
+    AddMenu(new UiMenu(new Utf8String("&Redo"), MENU_INTL_EDIT_REDO), parent);
+    AddMenu(new UiMenu(MENU_TYPE_SEPARATOR), parent);
+    AddMenu(new UiMenu(new Utf8String("Cu&t"), MENU_INTL_EDIT_CUT), parent);
+    AddMenu(new UiMenu(new Utf8String("&Copy"), MENU_INTL_EDIT_COPY), parent);
+    AddMenu(new UiMenu(new Utf8String("&Paste"), MENU_INTL_EDIT_PASTE), parent);
+    AddMenu(new UiMenu(MENU_TYPE_SEPARATOR), parent);
+    AddMenu(new UiMenu(new Utf8String("Select &All"), MENU_INTL_EDIT_SELECT_ALL), parent);
+    if (hasItems)
+        AddMenu(new UiMenu(MENU_TYPE_SEPARATOR), parent);
+}
+
+void UiWindowLinux::AddHelpMenuItems(GtkWidget* parent, bool hasItems) {
+    if (hasItems)
+        AddMenu(new UiMenu(MENU_TYPE_SEPARATOR), parent);
+    AddMenu(new UiMenu(new Utf8String("&About"), MENU_INTL_HELP_ABOUT), parent);
+}
+
+void UiWindowLinux::HandleInternalMenu(MENU_INTL menu) {
+    switch (menu) {
+    case MENU_INTL_FILE_EXIT:
+        Close();
+        break;
+    case MENU_INTL_EDIT_UNDO:
+        webkit_web_view_execute_editing_command(_webView, WEBKIT_EDITING_COMMAND_UNDO);
+        break;
+    case MENU_INTL_EDIT_REDO:
+        webkit_web_view_execute_editing_command(_webView, WEBKIT_EDITING_COMMAND_REDO);
+        break;
+    case MENU_INTL_EDIT_CUT:
+        webkit_web_view_execute_editing_command(_webView, WEBKIT_EDITING_COMMAND_CUT);
+        break;
+    case MENU_INTL_EDIT_COPY:
+        webkit_web_view_execute_editing_command(_webView, WEBKIT_EDITING_COMMAND_COPY);
+        break;
+    case MENU_INTL_EDIT_PASTE:
+        webkit_web_view_execute_editing_command(_webView, WEBKIT_EDITING_COMMAND_PASTE);
+        break;
+    case MENU_INTL_EDIT_SELECT_ALL:
+        webkit_web_view_execute_editing_command(_webView, WEBKIT_EDITING_COMMAND_SELECT_ALL);
+        break;
+    case MENU_INTL_HELP_ABOUT:
+        break;
+    default:
+        break;
+    }
+}
+
 void UiWindowLinux::MenuActivated(GtkWidget* item, gpointer data) {
     UiMenu* menu = (UiMenu*)data;
     UiWindowLinux* _this = (UiWindowLinux*)g_object_get_data(G_OBJECT(item), "_wnd");
     _this->EmitEvent(new WindowEventData(WINDOW_EVENT_MENU, (long)menu));
+    if (menu->InternalMenuId > 0) {
+        _this->HandleInternalMenu(menu->InternalMenuId);
+    }
 }
 
 WindowRect UiWindowLinux::GetWindowRect() {

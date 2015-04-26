@@ -18,6 +18,12 @@ Utf8String::Utf8String(UTF8CHAR* val) {
     _val = s;
 }
 
+Utf8String::Utf8String(const UTF8CHAR* val) {
+    UTF8CHAR* s = new UTF8CHAR[UTF8STRLEN(val) + 1];
+    UTF8STRCPY(s, val);
+    _val = s;
+}
+
 Utf8String::Utf8String(const Utf8String& str) {
     UTF8CHAR* s = new UTF8CHAR[UTF8STRLEN(str._val) + 1];
     UTF8STRCPY(s, str._val);

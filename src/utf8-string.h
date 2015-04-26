@@ -12,6 +12,7 @@ class Utf8String {
 public:
     Utf8String(v8::Handle<v8::Value> val);
     Utf8String(UTF8CHAR* val);
+    Utf8String(const UTF8CHAR* val);
     Utf8String(const Utf8String& str);
     ~Utf8String();
 
