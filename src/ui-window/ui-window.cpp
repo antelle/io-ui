@@ -56,6 +56,7 @@ void UiWindow::Init(Handle<Object> exports) {
     tpl->Set(isolate, "STATE_HIDDEN", Int32::New(isolate, WINDOW_STATE::WINDOW_STATE_HIDDEN));
     tpl->Set(isolate, "STATE_MAXIMIZED", Int32::New(isolate, WINDOW_STATE::WINDOW_STATE_MAXIMIZED));
     tpl->Set(isolate, "STATE_MINIMIZED", Int32::New(isolate, WINDOW_STATE::WINDOW_STATE_MINIMIZED));
+    tpl->Set(isolate, "STATE_FULLSCREEN", Int32::New(isolate, WINDOW_STATE::WINDOW_STATE_FULLSCREEN));
 
     tpl->Set(isolate, "MENU_TYPE_SIMPLE", Int32::New(isolate, MENU_TYPE::MENU_TYPE_SIMPLE));
     tpl->Set(isolate, "MENU_TYPE_SEPARATOR", Int32::New(isolate, MENU_TYPE::MENU_TYPE_SEPARATOR));

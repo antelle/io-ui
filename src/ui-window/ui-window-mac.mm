@@ -374,6 +374,13 @@ void UiWindowMac::Show(WindowRect& rect) {
             [_window miniaturize:nil];
         else if (_config->State == WINDOW_STATE_HIDDEN)
             [_window orderOut:nil];
+        else if (_config->State == WINDOW_STATE_FULLSCREEN) {
+            NSDictionary* options = @{
+                                      NSFullScreenModeApplicationPresentationOptions:
+                                          @(NSApplicationPresentationHideMenuBar | NSApplicationPresentationHideDock)
+                                      };
+            [_webView enterFullScreenMode:[NSScreen mainScreen] withOptions:options];
+        }
 
         UiWindowMac::_mainWindowShown = true;
         EmitEvent(new WindowEventData(WINDOW_EVENT_READY));
@@ -567,6 +574,8 @@ WINDOW_STATE UiWindowMac::GetState() {
             state = WINDOW_STATE::WINDOW_STATE_MAXIMIZED;
         else if (!_window.isVisible)
             state = WINDOW_STATE::WINDOW_STATE_HIDDEN;
+        else if (_webView.isInFullScreenMode)
+            state = WINDOW_STATE::WINDOW_STATE_FULLSCREEN;
         else
             state = WINDOW_STATE::WINDOW_STATE_NORMAL;
     });
@@ -580,7 +589,9 @@ void UiWindowMac::SetState(WINDOW_STATE state) {
         if ([_window isMiniaturized] && (state != WINDOW_STATE::WINDOW_STATE_MINIMIZED))
             [_window deminiaturize:nil];
         if ([_window isZoomed] && (state != WINDOW_STATE::WINDOW_STATE_MAXIMIZED))
-            _window.isZoomed = FALSE; // TODO
+            _window.isZoomed = FALSE;
+        if (_webView.isInFullScreenMode)
+            [_webView exitFullScreenModeWithOptions:nil];
         switch (state) {
         case WINDOW_STATE::WINDOW_STATE_NORMAL:
             break;
@@ -595,6 +606,15 @@ void UiWindowMac::SetState(WINDOW_STATE state) {
         case WINDOW_STATE::WINDOW_STATE_MINIMIZED:
             if (!_window.isMiniaturized)
                 [_window miniaturize:nil];
+            break;
+        case WINDOW_STATE::WINDOW_STATE_FULLSCREEN:
+            {
+                NSDictionary* options = @{
+                                          NSFullScreenModeApplicationPresentationOptions:
+                                              @(NSApplicationPresentationHideMenuBar | NSApplicationPresentationHideDock)
+                                          };
+                [_webView enterFullScreenMode:[NSScreen mainScreen] withOptions:options];
+            }
             break;
         }
     });

@@ -10,7 +10,8 @@ var WindowState = {
     normal: 0,
     hidden: 1,
     maximized: 2,
-    minimized: 3
+    minimized: 3,
+    fullscreen: 4
 };
 
 process.chdir(path.join(__dirname));
