@@ -51,6 +51,18 @@ app.window.once('documentComplete', function () {
     });
     app.window.onMessage = function(msg) {
         console.log('Message received: ' + JSON.stringify(msg));
+        if (msg.selectFiles) {
+            app.window.selectFile({
+                open: true,
+                title: 'Select a file',
+                dirs: true,
+                ext: ['js', 'md', '*'],
+                multiple: true,
+                complete: function(files) {
+                    app.window.postMessage({ selectedFiles: files });
+                }
+            });
+        }
         return { result: 'ok' };
     };
 });

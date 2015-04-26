@@ -37,6 +37,7 @@ void UiWindow::Init(Handle<Object> exports) {
     NODE_SET_PROTOTYPE_METHOD(tpl, "move", Move);
     NODE_SET_PROTOTYPE_METHOD(tpl, "navigate", Navigate);
     NODE_SET_PROTOTYPE_METHOD(tpl, "postMessage", PostMsg);
+    NODE_SET_PROTOTYPE_METHOD(tpl, "selectFile", SelectFile);
 
     auto protoTpl = tpl->PrototypeTemplate();
 
@@ -262,6 +263,32 @@ void UiWindow::InvokeEventCallback(Isolate* isolate, WindowEventData* data) {
         if (error)
             delete error;
     }
+    else if (evt == WINDOW_EVENT_SELECT_FILE) {
+        auto params = (WindowOpenFileParams*)data->Arg1;
+        auto result = (Utf8String**)data->Arg2;
+        Handle<Value> callbackResult;
+        if (result) {
+            auto len = 0;
+            for (len = 0; result[len]; ) {
+                len++;
+            }
+            auto resArr = Array::New(isolate, len);
+            callbackResult = resArr;
+            for (auto i = 0; result[i]; i++) {
+                resArr->Set(i, *result[i]);
+                delete result[i];
+            }
+            delete result;
+        } else {
+            callbackResult = (Handle<Value>)Null(isolate);
+        }
+        if (params->Complete) {
+            auto callbackFn = Local<Function>::New(isolate, *params->Complete);
+            Handle<Value> argv[] = { callbackResult };
+            callbackFn->Call(hndl, 1, argv);
+        }
+        delete params;
+    }
 }
 
 void UiWindow::EmitEvent(WindowEventData* asyncData) {
@@ -288,6 +315,39 @@ Handle<Value> UiWindow::JsonParse(Handle<Value> val) {
     auto fn = Handle<Function>::Cast(JSON->Get(String::NewFromUtf8(isolate, "parse")));
     Handle<Value> argv[] = { val };
     return fn->Call(global, 1, argv);
+}
+
+void UiWindow::SelectFile(const FunctionCallbackInfo<Value>& args) {
+    Isolate *isolate = Isolate::GetCurrent();
+    HandleScope scope(isolate);
+    UiWindow* _this = ObjectWrap::Unwrap<UiWindow>(args.This());
+    auto params = new WindowOpenFileParams();
+    if (args.Length() > 0 && args[0]->IsObject()) {
+        auto config = Handle<Object>::Cast(args[0]);
+        params->Open = config->Get(String::NewFromUtf8(isolate, "open"))->BooleanValue();
+        if (config->Get(String::NewFromUtf8(isolate, "title"))->IsString())
+            params->Title = new Utf8String(config->Get(String::NewFromUtf8(isolate, "title")));
+        params->Dirs = config->Get(String::NewFromUtf8(isolate, "dirs"))->BooleanValue();
+        params->Multiple = config->Get(String::NewFromUtf8(isolate, "multiple"))->BooleanValue();
+        if (config->Get(String::NewFromUtf8(isolate, "ext"))->IsArray()) {
+            auto arr = Handle<Array>::Cast(config->Get(String::NewFromUtf8(isolate, "ext")));
+            auto len = arr->Length();
+            if (len > 0) {
+                params->Ext = new Utf8String*[len + 1];
+                for (unsigned i = 0; i < len; i++) {
+                    params->Ext[i] = new Utf8String(arr->Get(i));
+                }
+                params->Ext[len] = NULL;
+            }
+        }
+        if (config->Get(String::NewFromUtf8(isolate, "complete"))->IsFunction()) {
+            auto fn = Local<Function>::Cast(config->Get(String::NewFromUtf8(isolate, "complete")));
+            params->Complete = new Persistent<Function>(isolate, fn);
+        }
+    }
+    if (!params->Title)
+        params->Title = new Utf8String("Select file");
+    _this->SelectFile(params);
 }
 
 void UiWindow::GetOnMessage(Local<String> property, const PropertyCallbackInfo<Value>& info) {

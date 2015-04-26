@@ -18,6 +18,10 @@
         });
     };
 
+    document.getElementById('btn3').onclick = function() {
+        backend.postMessage({ selectFiles: true });
+    };
+
     backend.onMessage = function(msg) {
         document.getElementById("res").innerHTML = JSON.stringify(msg);
         return { processed: 'ok' };

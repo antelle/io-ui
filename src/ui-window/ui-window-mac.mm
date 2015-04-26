@@ -13,6 +13,7 @@ protected:
     virtual void Close();
     virtual void Navigate(Utf8String* url);virtual void PostMsg(Utf8String* msg, v8::Persistent<v8::Function>* callback);
     virtual void MsgCallback(void* callback, Utf8String* result, Utf8String* error);
+    virtual void SelectFile(WindowOpenFileParams* params);
     
     virtual void SetWindowRect(WindowRect& rect);
     virtual WindowRect GetWindowRect();
@@ -434,6 +435,53 @@ void UiWindowMac::MsgCallback(void* callback, Utf8String* result, Utf8String* er
             delete result;
         if (error)
             delete error;
+    });
+}
+
+void UiWindowMac::SelectFile(WindowOpenFileParams* params) {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NSSavePanel* panel = params->Open ? [NSOpenPanel openPanel] : [NSSavePanel savePanel];
+        panel.canCreateDirectories = YES;
+        panel.directoryURL = nil;
+        panel.title = [NSString stringWithUTF8String:*params->Title];
+        panel.prompt = params->Open ? @"Open" : @"Save";
+        if (params->Ext) {
+            panel.allowsOtherFileTypes = NO;
+            NSMutableArray* arr = [[NSMutableArray alloc] init];
+            for (int i = 0; params->Ext[i]; i++) {
+                if (!strlen(*params->Ext[i]) || !strcmp(*params->Ext[i], "*")) {
+                    panel.allowsOtherFileTypes = YES;
+                } else {
+                    [arr addObject:[NSString stringWithUTF8String:*params->Ext[i]]];
+                }
+            }
+            panel.allowedFileTypes = arr;
+        }
+        if (params->Open) {
+            NSOpenPanel* openPanel = (NSOpenPanel*)panel;
+            openPanel.canChooseFiles = YES;
+            openPanel.canChooseDirectories = params->Dirs ? YES : NO;
+            openPanel.allowsMultipleSelection = params->Multiple ? YES : NO;
+        }
+        Utf8String** result = NULL;
+        if ([panel runModal] == NSOKButton) {
+            if (params->Open) {
+                auto urls = [(NSOpenPanel*)panel URLs];
+                auto count = [urls count];
+                result = new Utf8String*[count + 1];
+                for (unsigned i = 0; i < count; i++) {
+                    result[i] = new Utf8String(((NSURL*)urls[i]).path.UTF8String);
+                }
+                result[count] = NULL;
+            } else {
+                result = new Utf8String*[2];
+                result[0] = new Utf8String(panel.URL.path.UTF8String);
+                result[1] = NULL;
+            }
+        }
+        if (params->Complete) {
+            EmitEvent(new WindowEventData(WINDOW_EVENT_SELECT_FILE, (long)params, (long)result));
+        }
     });
 }
 

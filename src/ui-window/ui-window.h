@@ -19,6 +19,7 @@ enum WINDOW_EVENT : int {
     WINDOW_EVENT_MENU = 7,
     WINDOW_EVENT_MESSAGE = 8,
     WINDOW_EVENT_MESSAGE_CALLBACK = 9,
+    WINDOW_EVENT_SELECT_FILE = 10,
 };
 
 struct WindowRect {
@@ -45,6 +46,24 @@ struct WindowEventData {
     WindowEventData(WINDOW_EVENT evt, long arg1 = 0, long arg2 = 0, long arg3 = 0) : Evt(evt), Arg1(arg1), Arg2(arg2), Arg3(arg3) {}
 };
 
+struct WindowOpenFileParams {
+    bool Open = true;
+    Utf8String* Title = NULL;
+    bool Dirs = false;
+    Utf8String** Ext = NULL;
+    bool Multiple = false;
+    v8::Persistent<v8::Function>* Complete;
+    
+    ~WindowOpenFileParams() {
+        if (Title)
+            delete Title;
+        if (Complete) {
+            Complete->Reset();
+            delete Complete;
+        }
+    }
+};
+
 class UiWindow : public node::ObjectWrap {
 public:
     static void Init(v8::Handle<v8::Object> exports);
@@ -65,6 +84,7 @@ protected:
     virtual void Close() = 0;
     virtual void Navigate(Utf8String* url) = 0;
     virtual void PostMsg(Utf8String* msg, v8::Persistent<v8::Function>* callback) = 0;
+    virtual void SelectFile(WindowOpenFileParams* param) = 0;
     virtual void MsgCallback(void* callback, Utf8String* result, Utf8String* error) = 0;
     virtual void SetWindowRect(WindowRect& rect) = 0;
     virtual WindowRect GetWindowRect() = 0;
@@ -98,6 +118,7 @@ private:
     static void Move(const v8::FunctionCallbackInfo<v8::Value>& args);
     static void Navigate(const v8::FunctionCallbackInfo<v8::Value>& args);
     static void PostMsg(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void SelectFile(const v8::FunctionCallbackInfo<v8::Value>& args);
 
     static void GetOnMessage(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
     static void SetOnMessage(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
