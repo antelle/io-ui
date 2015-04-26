@@ -45,6 +45,7 @@ private:
     GdkWindow* _gdkWindow;
     GtkWidget* _menu = NULL;
     bool _topmost = false;
+    bool _fullscreen = false;
     WindowRect _rect;
 
     static void WindowDestroyed(GtkWidget* widget, gpointer data);
@@ -199,6 +200,10 @@ void UiWindowLinux::ShowOsWindow() {
         break;
     case WINDOW_STATE::WINDOW_STATE_MINIMIZED:
         gtk_window_iconify(GTK_WINDOW(this->_window));
+        break;
+    case WINDOW_STATE::WINDOW_STATE_FULLSCREEN:
+        gtk_window_fullscreen(GTK_WINDOW(this->_window));
+        _fullscreen = true;
         break;
     }
     
@@ -552,7 +557,9 @@ WINDOW_STATE UiWindowLinux::GetState() {
     WINDOW_STATE state;
     ExecOnMainThreadSync([this, &state]() {
         gint st = gdk_window_get_state(GDK_WINDOW(_gdkWindow));
-        if (!gtk_widget_is_visible(_window)) {
+        if (_fullscreen) {
+            state = WINDOW_STATE::WINDOW_STATE_FULLSCREEN;
+        } else if (!gtk_widget_is_visible(_window)) {
             state = WINDOW_STATE::WINDOW_STATE_HIDDEN;
         } else if (st & GDK_WINDOW_STATE_MAXIMIZED) {
             state = WINDOW_STATE::WINDOW_STATE_MAXIMIZED;
@@ -577,6 +584,10 @@ void UiWindowLinux::SetState(WINDOW_STATE state) {
             gtk_window_unmaximize(GTK_WINDOW(this->_window));
         if ((curState & GDK_WINDOW_STATE_ICONIFIED) && (state != WINDOW_STATE::WINDOW_STATE_MINIMIZED))
             gtk_window_deiconify(GTK_WINDOW(this->_window));
+        if (_fullscreen && (state != WINDOW_STATE::WINDOW_STATE_FULLSCREEN)) {
+            gtk_window_unfullscreen(GTK_WINDOW(this->_window));
+            _fullscreen = false;
+        }
         switch (state) {
         case WINDOW_STATE::WINDOW_STATE_NORMAL:
             gtk_window_present(GTK_WINDOW(_window));
@@ -590,6 +601,10 @@ void UiWindowLinux::SetState(WINDOW_STATE state) {
             break;
         case WINDOW_STATE::WINDOW_STATE_MINIMIZED:
             gtk_window_iconify(GTK_WINDOW(this->_window));
+            break;
+        case WINDOW_STATE::WINDOW_STATE_FULLSCREEN:
+            gtk_window_fullscreen(GTK_WINDOW(this->_window));
+            _fullscreen = true;
             break;
         }
     });
