@@ -317,6 +317,10 @@ private:
     WindowRect _rect;
 
     bool _resizeMove = false;
+    bool _fullscreen = false;
+    LONG _styleBackup;
+    LONG _exStyleBackup;
+    WindowRect _sizeBackup;
 
     // IBrowserEventHandler
     void DocumentComplete();
@@ -552,34 +556,13 @@ STDMETHODIMP IoUiSite::Exec(const GUID *pguidCmdGroup, DWORD nCmdID, DWORD nCmde
     case OLECMDID_PAGESETUP:
     case OLECMDID_SPELL:
     case OLECMDID_PROPERTIES:
-    //case OLECMDID_CUT:
-    //case OLECMDID_COPY:
-    //case OLECMDID_PASTE:
-    //case OLECMDID_PASTESPECIAL:
-    //case OLECMDID_UNDO:
-    //case OLECMDID_REDO:
-    //case OLECMDID_SELECTALL:
-    //case OLECMDID_CLEARSELECTION:
     case OLECMDID_ZOOM:
-    //case OLECMDID_GETZOOMRANGE:
     case OLECMDID_UPDATECOMMANDS:
     case OLECMDID_REFRESH:
     case OLECMDID_STOP:
     case OLECMDID_HIDETOOLBARS:
-    //case OLECMDID_SETPROGRESSMAX:
-    //case OLECMDID_SETPROGRESSPOS:
-    //case OLECMDID_SETPROGRESSTEXT:
-    //case OLECMDID_SETTITLE:
-    //case OLECMDID_SETDOWNLOADSTATE:
-    //case OLECMDID_STOPDOWNLOAD:
     case OLECMDID_ONTOOLBARACTIVATED:
     case OLECMDID_FIND:
-    //case OLECMDID_DELETE:
-    //case OLECMDID_HTTPEQUIV:
-    //case OLECMDID_HTTPEQUIV_DONE:
-    //case OLECMDID_ENABLE_INTERACTION:
-    //case OLECMDID_ONUNLOAD:
-    //case OLECMDID_PROPERTYBAG2:
     case OLECMDID_PREREFRESH:
     case OLECMDID_SHOWSCRIPTERROR:
     case OLECMDID_SHOWMESSAGE:
@@ -589,40 +572,17 @@ STDMETHODIMP IoUiSite::Exec(const GUID *pguidCmdGroup, DWORD nCmdID, DWORD nCmde
     case OLECMDID_CLOSE:
     case OLECMDID_ALLOWUILESSSAVEAS:
     case OLECMDID_DONTDOWNLOADCSS:
-    //case OLECMDID_UPDATEPAGESTATUS:
     case OLECMDID_PRINT2:
     case OLECMDID_PRINTPREVIEW2:
     case OLECMDID_SETPRINTTEMPLATE:
     case OLECMDID_GETPRINTTEMPLATE:
-    //case OLECMDID_PAGEACTIONBLOCKED:
-    //case OLECMDID_PAGEACTIONUIQUERY:
-    //case OLECMDID_FOCUSVIEWCONTROLS:
-    //case OLECMDID_FOCUSVIEWCONTROLSQUERY:
     case OLECMDID_SHOWPAGEACTIONMENU:
     case OLECMDID_ADDTRAVELENTRY:
     case OLECMDID_UPDATETRAVELENTRY:
     case OLECMDID_UPDATEBACKFORWARDSTATE:
     case OLECMDID_OPTICAL_ZOOM:
-    //case OLECMDID_OPTICAL_GETZOOMRANGE:
-    //case OLECMDID_WINDOWSTATECHANGED:
-    //case OLECMDID_ACTIVEXINSTALLSCOPE:
-    //case OLECMDID_UPDATETRAVELENTRY_DATARECOVERY:
     case 68://OLECMDID_SHOWTASKDLG:
-    //case OLECMDID_POPSTATEEVENT:
-    //case OLECMDID_VIEWPORT_MODE:
-    //case OLECMDID_LAYOUT_VIEWPORT_WIDTH:
-    //case OLECMDID_VISUAL_VIEWPORT_EXCLUDE_BOTTOM:
     case 73://OLECMDID_USER_OPTICAL_ZOOM:
-    //case OLECMDID_PAGEAVAILABLE:
-    //case OLECMDID_GETUSERSCALABLE:
-    //case OLECMDID_UPDATE_CARET:
-    //case OLECMDID_ENABLE_VISIBILITY:
-    //case OLECMDID_MEDIA_PLAYBACK:
-    //case OLECMDID_SETFAVICON:
-    //case OLECMDID_SET_HOST_FULLSCREENMODE:
-    //case OLECMDID_EXITFULLSCREEN:
-    //case OLECMDID_SCROLLCOMPLETE:
-    //case OLECMDID_ONBEFOREUNLOAD:
         return S_OK;
     default:
         return OLECMDERR_E_NOTSUPPORTED;
@@ -897,10 +857,10 @@ BOOL UiWindowWin::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
         CreateEmbeddedWebControl();
         PerfTrace::Reg(UI_PERF_EVENT::UI_PERF_EVENT_INIT_BROWSER_CONTROL);
         return TRUE;
-    case  WM_ENTERSIZEMOVE:
+    case WM_ENTERSIZEMOVE:
         _resizeMove = true;
         return TRUE;
-    case  WM_EXITSIZEMOVE:
+    case WM_EXITSIZEMOVE:
         _resizeMove = false;
         return TRUE;
     case WM_SIZE: {
@@ -1357,15 +1317,23 @@ Utf8String* UiWindowWin::GetTitle() {
 WINDOW_STATE UiWindowWin::GetState() {
     if (!IsWindowVisible(hwnd))
         return WINDOW_STATE::WINDOW_STATE_HIDDEN;
+    if (_fullscreen)
+        return WINDOW_STATE::WINDOW_STATE_FULLSCREEN;
     if (IsIconic(hwnd))
         return WINDOW_STATE::WINDOW_STATE_MINIMIZED;
     if (IsZoomed(hwnd))
         return WINDOW_STATE::WINDOW_STATE_MAXIMIZED;
-    // TODO return WINDOW_STATE::WINDOW_STATE_FULLSCREEN;
     return WINDOW_STATE::WINDOW_STATE_NORMAL;
 }
 
 void UiWindowWin::SetState(WINDOW_STATE state) {
+    if (_fullscreen && (state != WINDOW_STATE::WINDOW_STATE_FULLSCREEN)) {
+        SetWindowLong(hwnd, GWL_STYLE, _styleBackup);
+        SetWindowLong(hwnd, GWL_EXSTYLE, _exStyleBackup);
+        _fullscreen = false;
+        SetWindowPos(hwnd, NULL, _sizeBackup.Left, _sizeBackup.Top, _sizeBackup.Width, _sizeBackup.Height,
+            SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
+    }
     switch (state) {
     case WINDOW_STATE::WINDOW_STATE_NORMAL:
         ShowWindow(hwnd, SW_SHOWNORMAL);
@@ -1378,6 +1346,20 @@ void UiWindowWin::SetState(WINDOW_STATE state) {
         break;
     case WINDOW_STATE::WINDOW_STATE_MINIMIZED:
         ShowWindow(hwnd, SW_SHOWMINIMIZED);
+        break;
+    case WINDOW_STATE::WINDOW_STATE_FULLSCREEN:
+        ShowWindow(hwnd, SW_SHOWNORMAL);
+        _sizeBackup = GetWindowRect();
+        _styleBackup = GetWindowLong(hwnd, GWL_STYLE);
+        _exStyleBackup = GetWindowLong(hwnd, GWL_EXSTYLE);
+        SetWindowLong(hwnd, GWL_STYLE, _styleBackup & ~(WS_CAPTION | WS_THICKFRAME));
+        SetWindowLong(hwnd, GWL_EXSTYLE, _exStyleBackup & ~(WS_EX_DLGMODALFRAME | WS_EX_WINDOWEDGE | WS_EX_CLIENTEDGE | WS_EX_STATICEDGE));
+        MONITORINFO monitorInfo;
+        monitorInfo.cbSize = sizeof(monitorInfo);
+        GetMonitorInfo(MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST), &monitorInfo);
+        SetWindowPos(hwnd, NULL, monitorInfo.rcMonitor.left, monitorInfo.rcMonitor.top, monitorInfo.rcMonitor.right, monitorInfo.rcMonitor.bottom,
+            SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
+        _fullscreen = true;
         break;
     }
 }
