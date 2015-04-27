@@ -346,7 +346,7 @@ void UiWindow::SelectFile(const FunctionCallbackInfo<Value>& args) {
         }
     }
     if (!params->Title)
-        params->Title = new Utf8String("Select file");
+        params->Title = new Utf8String(String::NewFromUtf8(isolate, "Select file"));
     _this->SelectFile(params);
 }
 

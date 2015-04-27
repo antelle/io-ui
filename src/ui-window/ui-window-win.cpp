@@ -9,6 +9,7 @@
 #include <ExDispid.h>
 #include <shlguid.h>
 #include <Shlwapi.h>
+#include <Shlobj.h>
 #include <iostream>
 #include <iomanip>
 
@@ -16,6 +17,7 @@
 #define WM_USER_NAVIGATE (WM_APP + 2)
 #define WM_USER_POST_MSG (WM_APP + 3)
 #define WM_USER_POST_MSG_CB (WM_APP + 4)
+#define WM_USER_SELECT_FILE (WM_APP + 5)
 
 #define BASE_DPI 96
 
@@ -261,6 +263,16 @@ private:
 
 #pragma endregion
 
+#pragma region Data structures
+
+struct MsgCallbackParam {
+    void* Callback;
+    Utf8String* Result;
+    Utf8String* Error;
+};
+
+#pragma endregion
+
 #pragma region UiWindowWin
 
 class UiWindowWin : public UiWindow, IBrowserEventHandler {
@@ -270,6 +282,7 @@ protected:
     virtual void Navigate(Utf8String* url);
     virtual void PostMsg(Utf8String* msg, v8::Persistent<v8::Function>* callback);
     virtual void MsgCallback(void* callback, Utf8String* result, Utf8String* error);
+    virtual void SelectFile(WindowOpenFileParams* params);
 
     virtual void SetWindowRect(WindowRect& rect);
     virtual WindowRect GetWindowRect();
@@ -336,17 +349,12 @@ private:
     void AddHelpMenuItems(HMENU parent, bool hasItems);
     void HandleInternalMenu(MENU_INTL menu);
 
+    void NavigateSync(Utf8String* url);
+    void PostMsgSync(Utf8String* msg, long callback);
+    void PostMsgCbSync(MsgCallbackParam* cb);
+    void SelectFileSync(WindowOpenFileParams* params);
+
     UI_RESULT ExecScript(WCHAR* script, LPVARIANT ret = NULL, LPEXCEPINFO ex = NULL);
-};
-
-#pragma endregion
-
-#pragma region Data structures
-
-struct MsgCallbackParam {
-    void* Callback;
-    Utf8String* Result;
-    Utf8String* Error;
 };
 
 #pragma endregion
@@ -899,77 +907,170 @@ BOOL UiWindowWin::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
         }
         return FALSE;
     }
-    case WM_USER_NAVIGATE: {
-        Utf8String* url = (Utf8String*)wParam;
-
-        VARIANT vURL;
-        vURL.vt = VT_BSTR;
-        vURL.bstrVal = SysAllocString(*url);
-        VARIANT ve1, ve2, ve3, ve4;
-        ve1.vt = VT_EMPTY;
-        ve2.vt = VT_EMPTY;
-        ve3.vt = VT_EMPTY;
-        ve4.vt = VT_EMPTY;
-
-        PerfTrace::Reg(UI_PERF_EVENT::UI_PERF_EVENT_CALL_NAVIGATE);
-        _webBrowser->Navigate2(&vURL, &ve1, &ve2, &ve3, &ve4);
-        VariantClear(&vURL);
-        delete url;
+    case WM_USER_NAVIGATE:
+        NavigateSync((Utf8String*)wParam);
         return TRUE;
-    }
-    case WM_USER_POST_MSG: {
-        Utf8String* msg = (Utf8String*)wParam;
-        WCHAR* script = new WCHAR[wcslen(*msg) + 128];
-        wcscpy(script, L"JSON.stringify(typeof backend.onMessage === 'function' ? backend.onMessage(");
-        wcscat(script, *msg);
-        wcscat(script, L"):null)");
-        delete msg;
-        VARIANT ret = { 0 };
-        VariantInit(&ret);
-        EXCEPINFO ex = { 0 };
-        if (UI_SUCCEEDED(ExecScript(script, &ret, &ex)) && lParam) {
-            Utf8String* result = ret.vt == VT_BSTR && ret.bstrVal != NULL ? new Utf8String(ret.bstrVal) : NULL;
-            Utf8String* error = result == NULL && ex.bstrDescription != NULL ? new Utf8String(ex.bstrDescription) : NULL;
-            VariantClear(&ret);
-            EmitEvent(new WindowEventData(WINDOW_EVENT_MESSAGE_CALLBACK, (long)lParam, (long)result, (long)error));
-        }
-        delete script;
+    case WM_USER_POST_MSG:
+        PostMsgSync((Utf8String*)wParam, (long)lParam);
         return TRUE;
-    }
     case WM_USER_POST_MSG_CB:
-        MsgCallbackParam* cb = (MsgCallbackParam*)wParam;
-        if (cb->Callback) {
-            IDispatch* dispCallback = (IDispatch*)cb->Callback;
-            DISPPARAMS params = { 0 };
-            params.cArgs = 2;
-            params.rgvarg = new VARIANTARG[2];
-            VariantInit(&params.rgvarg[0]);
-            VariantInit(&params.rgvarg[1]);
-            if (cb->Result) {
-                params.rgvarg[1].vt = VT_BSTR;
-                params.rgvarg[1].bstrVal = SysAllocString(*cb->Result);
-            }
-            else {
-                params.rgvarg[1].vt = VT_NULL;
-            }
-            if (cb->Error) {
-                params.rgvarg[0].vt = VT_BSTR;
-                params.rgvarg[0].bstrVal = SysAllocString(*cb->Error);
-            }
-            else {
-                params.rgvarg[0].vt = VT_NULL;
-            }
-            HRESULT hr = dispCallback->Invoke(DISPID_VALUE, IID_NULL, LOCALE_USER_DEFAULT, DISPATCH_METHOD, &params, NULL, NULL, NULL);
-            dispCallback->Release();
-        }
-        if (cb->Result)
-            delete cb->Result;
-        if (cb->Error)
-            delete cb->Error;
-        delete cb;
+        PostMsgCbSync((MsgCallbackParam*)wParam);
+        return TRUE;
+    case WM_USER_SELECT_FILE:
+        SelectFileSync((WindowOpenFileParams*)wParam);
         return TRUE;
     }
     return FALSE;
+}
+
+void UiWindowWin::NavigateSync(Utf8String* url) {
+    VARIANT vURL;
+    vURL.vt = VT_BSTR;
+    vURL.bstrVal = SysAllocString(*url);
+    VARIANT ve1, ve2, ve3, ve4;
+    ve1.vt = VT_EMPTY;
+    ve2.vt = VT_EMPTY;
+    ve3.vt = VT_EMPTY;
+    ve4.vt = VT_EMPTY;
+
+    PerfTrace::Reg(UI_PERF_EVENT::UI_PERF_EVENT_CALL_NAVIGATE);
+    _webBrowser->Navigate2(&vURL, &ve1, &ve2, &ve3, &ve4);
+    VariantClear(&vURL);
+    delete url;
+}
+
+void UiWindowWin::PostMsgSync(Utf8String* msg, long callback) {
+    WCHAR* script = new WCHAR[wcslen(*msg) + 128];
+    wcscpy(script, L"JSON.stringify(typeof backend.onMessage === 'function' ? backend.onMessage(");
+    wcscat(script, *msg);
+    wcscat(script, L"):null)");
+    delete msg;
+    VARIANT ret = { 0 };
+    VariantInit(&ret);
+    EXCEPINFO ex = { 0 };
+    if (UI_SUCCEEDED(ExecScript(script, &ret, &ex)) && callback) {
+        Utf8String* result = ret.vt == VT_BSTR && ret.bstrVal != NULL ? new Utf8String(ret.bstrVal) : NULL;
+        Utf8String* error = result == NULL && ex.bstrDescription != NULL ? new Utf8String(ex.bstrDescription) : NULL;
+        VariantClear(&ret);
+        EmitEvent(new WindowEventData(WINDOW_EVENT_MESSAGE_CALLBACK, callback, (long)result, (long)error));
+    }
+    delete script;
+}
+
+void UiWindowWin::PostMsgCbSync(MsgCallbackParam* cb) {
+    if (cb->Callback) {
+        IDispatch* dispCallback = (IDispatch*)cb->Callback;
+        DISPPARAMS params = { 0 };
+        params.cArgs = 2;
+        params.rgvarg = new VARIANTARG[2];
+        VariantInit(&params.rgvarg[0]);
+        VariantInit(&params.rgvarg[1]);
+        if (cb->Result) {
+            params.rgvarg[1].vt = VT_BSTR;
+            params.rgvarg[1].bstrVal = SysAllocString(*cb->Result);
+        }
+        else {
+            params.rgvarg[1].vt = VT_NULL;
+        }
+        if (cb->Error) {
+            params.rgvarg[0].vt = VT_BSTR;
+            params.rgvarg[0].bstrVal = SysAllocString(*cb->Error);
+        }
+        else {
+            params.rgvarg[0].vt = VT_NULL;
+        }
+        HRESULT hr = dispCallback->Invoke(DISPID_VALUE, IID_NULL, LOCALE_USER_DEFAULT, DISPATCH_METHOD, &params, NULL, NULL, NULL);
+        dispCallback->Release();
+    }
+    if (cb->Result)
+        delete cb->Result;
+    if (cb->Error)
+        delete cb->Error;
+    delete cb;
+}
+
+void UiWindowWin::SelectFileSync(WindowOpenFileParams* params) {
+    Utf8String** result = NULL;
+    if (params->Dirs) {
+        BROWSEINFO bi = { 0 };
+        bi.hwndOwner = hwnd;
+        WCHAR folderName[MAX_PATH];
+        memset(folderName, 0, sizeof(folderName));
+        bi.pszDisplayName = folderName;
+        bi.lpszTitle = *params->Title;
+        bi.ulFlags = BIF_DONTGOBELOWDOMAIN | BIF_EDITBOX | BIF_NEWDIALOGSTYLE | BIF_USENEWUI;
+        auto pidl = SHBrowseForFolder(&bi);
+        if (pidl) {
+            if (SHGetPathFromIDList(pidl, folderName)) {
+                result = new Utf8String*[2];
+                result[0] = new Utf8String(folderName);
+                result[1] = 0;
+            }
+        }
+    } else {
+        OPENFILENAME ofs = { 0 };
+        ofs.lStructSize = sizeof(OPENFILENAME);
+        ofs.hwndOwner = hwnd;
+        if (params->Ext) {
+            WCHAR filter[1024];
+            memset(filter, 0, sizeof(filter));
+            bool allowAllTypes = false;
+            for (int i = 0; params->Ext[i]; i++) {
+                if (!lstrlen(*params->Ext[i]) || !lstrcmp(*params->Ext[i], L"*")) {
+                    allowAllTypes = true;
+                } else {
+                    if (filter[0])
+                        lstrcat(filter, L";");
+                    lstrcat(filter, L"*.");
+                    lstrcat(filter, *params->Ext[i]);
+                    if (!ofs.lpstrDefExt) {
+                        ofs.lpstrDefExt = *params->Ext[i];
+                    }
+                }
+            }
+            if (filter[0]) {
+                auto len = lstrlen(filter);
+                lstrcpy(&filter[len + 1], filter);
+                if (allowAllTypes) {
+                    lstrcpy(&filter[len * 2 + 2], L"All Files");
+                    lstrcpy(&filter[len * 2 + lstrlen(L"All Files") + 3], L"*.*");
+                }
+                ofs.lpstrFilter = filter;
+            }
+        }
+        WCHAR selectedFile[1024 * 50];
+        memset(selectedFile, 0, sizeof(selectedFile));
+        ofs.lpstrFile = selectedFile;
+        ofs.nMaxFile = sizeof(selectedFile) / sizeof(WCHAR);
+        ofs.lpstrTitle = *params->Title;
+        ofs.Flags = OFN_EXPLORER;
+        if (params->Open) {
+            ofs.Flags |= OFN_FILEMUSTEXIST;
+            if (params->Multiple)
+                ofs.Flags |= OFN_ALLOWMULTISELECT;
+        }
+        auto res = params->Open ? GetOpenFileName(&ofs) : GetSaveFileName(&ofs);
+        if (res) {
+            int ix = lstrlen(selectedFile) + 1;
+            WCHAR fileName[1024];
+            int count = 0;
+            std::vector<Utf8String*> vec;
+            while (selectedFile[ix]) {
+                lstrcpy(fileName, selectedFile);
+                lstrcat(fileName, L"\\");
+                lstrcat(fileName, &selectedFile[ix]);
+                ix += lstrlen(&selectedFile[ix]) + 1;
+                vec.push_back(new Utf8String(fileName));
+            }
+            if (!vec.size())
+                vec.push_back(new Utf8String(selectedFile));
+            result = new Utf8String*[vec.size() + 1];
+            for (auto i = 0; i < vec.size(); i++)
+                result[i] = vec[i];
+            result[vec.size()] = NULL;
+        }
+    }
+    EmitEvent(new WindowEventData(WINDOW_EVENT_SELECT_FILE, (long)params, (long)result));
 }
 
 bool UiWindowWin::HandleAccelerator(MSG* msg) {
@@ -1097,6 +1198,10 @@ void UiWindowWin::MsgCallback(void* callback, Utf8String* result, Utf8String* er
     cb->Result = result;
     cb->Error = error;
     PostMessage(hwnd, WM_USER_POST_MSG_CB, (WPARAM)cb, 0);
+}
+
+void UiWindowWin::SelectFile(WindowOpenFileParams* params) {
+    PostMessage(hwnd, WM_USER_SELECT_FILE, (WPARAM)params, 0);
 }
 
 void UiWindowWin::DocumentComplete() {

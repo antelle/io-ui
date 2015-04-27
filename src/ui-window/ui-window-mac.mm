@@ -479,9 +479,7 @@ void UiWindowMac::SelectFile(WindowOpenFileParams* params) {
                 result[1] = NULL;
             }
         }
-        if (params->Complete) {
-            EmitEvent(new WindowEventData(WINDOW_EVENT_SELECT_FILE, (long)params, (long)result));
-        }
+        EmitEvent(new WindowEventData(WINDOW_EVENT_SELECT_FILE, (long)params, (long)result));
     });
 }
 

@@ -32,7 +32,7 @@ index 8886b74..118683b 100644
        }],
        [ 'OS in "linux freebsd openbsd solaris"', {
 diff --git a/node.gyp b/node.gyp
-index f60b294..da70e72 100644
+index f60b294..f65c9ce 100644
 --- a/node.gyp
 +++ b/node.gyp
 @@ -16,7 +16,7 @@
@@ -116,7 +116,7 @@ index f60b294..da70e72 100644
 +          'link_settings': {
 +            'libraries': [
 +              'Shlwapi.lib', 'ws2_32.lib', 'advapi32.lib', 'iphlpapi.lib', 'psapi.lib',
-+              'shell32.lib', 'winmm.lib', 'Ole32.lib', 'OleAut32.lib', 'Comctl32.lib'
++              'shell32.lib', 'winmm.lib', 'Ole32.lib', 'OleAut32.lib', 'Comctl32.lib', 'Comdlg32.lib'
 +            ]
 +          }
          }, { # POSIX
