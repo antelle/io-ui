@@ -452,7 +452,8 @@ void UiWindowMac::SelectFile(WindowOpenFileParams* params) {
                 if (!strlen(*params->Ext[i]) || !strcmp(*params->Ext[i], "*")) {
                     panel.allowsOtherFileTypes = YES;
                 } else {
-                    [arr addObject:[NSString stringWithUTF8String:*params->Ext[i]]];
+                    [arr addObject:[[NSString stringWithUTF8String:*params->Ext[i]] lowercaseString]];
+                    [arr addObject:[[NSString stringWithUTF8String:*params->Ext[i]] uppercaseString]];
                 }
             }
             panel.allowedFileTypes = arr;

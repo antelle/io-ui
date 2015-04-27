@@ -55,7 +55,7 @@ app.window.once('documentComplete', function () {
             app.window.selectFile({
                 open: true,
                 title: 'Select a file',
-                dirs: true,
+                dirs: false,
                 ext: ['js', 'md', '*'],
                 multiple: true,
                 complete: function(files) {

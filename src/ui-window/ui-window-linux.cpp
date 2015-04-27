@@ -16,6 +16,7 @@ protected:
     virtual void Navigate(Utf8String* url);
     virtual void PostMsg(Utf8String* msg, v8::Persistent<v8::Function>* callback);
     virtual void MsgCallback(void* callback, Utf8String* result, Utf8String* error);
+    virtual void SelectFile(WindowOpenFileParams* params);
 
     virtual void SetWindowRect(WindowRect& rect);
     virtual WindowRect GetWindowRect();
@@ -60,6 +61,7 @@ private:
     static JSValueRef PostMsgWebCallback(JSContextRef ctx, JSObjectRef func, JSObjectRef self,
         size_t argc, const JSValueRef argv[], JSValueRef* exception);
     static gboolean MsgCallbackSync(gpointer arg);
+    static gboolean SelectFileSync(gpointer arg);
 
     void AddMenu(UiMenu* menu, GtkWidget* parentMenu);
     void AddFileMenuItems(GtkWidget* parent, bool hasItems);
@@ -79,6 +81,11 @@ struct MsgCallbackArg {
     long callback;
     Utf8String* result;
     Utf8String* error;
+};
+
+struct SelectFileArg {
+    UiWindowLinux* win;
+    WindowOpenFileParams* params;
 };
 
 GtkApplication* UiWindowLinux::_app;
@@ -404,6 +411,82 @@ gboolean UiWindowLinux::MsgCallbackSync(gpointer data) {
     if (arg->error)
         delete arg->error;
     delete arg;
+    return false;
+}
+
+void UiWindowLinux::SelectFile(WindowOpenFileParams* params) {
+    auto arg = new SelectFileArg();
+    arg->win = this;
+    arg->params = params;
+    ExecOnMainThread(SelectFileSync, arg);
+}
+
+gboolean UiWindowLinux::SelectFileSync(gpointer arg) {
+    auto selArg = (SelectFileArg*)arg;
+    Utf8String** result = NULL;
+    auto action = selArg->params->Open ? selArg->params->Dirs ? GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER :
+        GTK_FILE_CHOOSER_ACTION_OPEN : GTK_FILE_CHOOSER_ACTION_SAVE;
+    auto dialog = gtk_file_chooser_dialog_new (*selArg->params->Title,
+        GTK_WINDOW(selArg->win->_window), action,
+        "_Cancel", GTK_RESPONSE_CANCEL,
+        selArg->params->Open ? "_Open" : "_Save", GTK_RESPONSE_ACCEPT, NULL);
+    if (selArg->params->Open && selArg->params->Multiple) {
+        gtk_file_chooser_set_select_multiple(GTK_FILE_CHOOSER(dialog), true);
+    }
+    if (selArg->params->Ext) {
+        auto filter = gtk_file_filter_new();
+        char filterStr[1024];
+        memset(filterStr, 0, sizeof(filterStr));
+        bool allowAllTypes = false;
+        for (int i = 0; selArg->params->Ext[i]; i++) {
+            if (!strlen(*selArg->params->Ext[i]) || !strcmp(*selArg->params->Ext[i], "*")) {
+                allowAllTypes = true;
+            } else {
+                if (filterStr[0])
+                    strcat(filterStr, ";");
+                char pattern [32];
+                strcpy(pattern, "*.");
+                strcat(pattern, *selArg->params->Ext[i]);
+                strcat(filterStr, pattern);
+                gtk_file_filter_add_pattern(filter, pattern);
+            }
+        }
+        if (filterStr[0]) {
+            gtk_file_filter_set_name(filter, filterStr);
+            gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), filter);
+            gtk_file_chooser_set_filter(GTK_FILE_CHOOSER(dialog), filter);
+            if (allowAllTypes) {
+                filter = gtk_file_filter_new();
+                gtk_file_filter_set_name(filter, "All");
+                gtk_file_filter_add_pattern(filter, "*");
+                gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), filter);
+            }
+        }
+    }
+    auto res = gtk_dialog_run(GTK_DIALOG(dialog));
+    if (res == GTK_RESPONSE_ACCEPT) {
+        auto files = gtk_file_chooser_get_files(GTK_FILE_CHOOSER(dialog));
+        auto len = 0;
+        auto file = files;
+        while (file) {
+            len++;
+            file = file->next;
+        }
+        int i = 0;
+        file = files;
+        result = new Utf8String*[len + 1];
+        while (file) {
+            auto filePath = g_file_get_path((GFile*)file->data);
+            g_object_unref(file->data);
+            result[i] = new Utf8String(filePath);
+            file = file->next;
+            i++;
+        }
+        result[len] = NULL;
+        g_slist_free(files);
+    }
+    gtk_widget_destroy (dialog);
+    selArg->win->EmitEvent(new WindowEventData(WINDOW_EVENT_SELECT_FILE, (long)selArg->params, (long)result));
     return false;
 }
 
