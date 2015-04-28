@@ -300,16 +300,18 @@ module.exports['multi-window: close secondary'] = function(test) {
     start('', function() {
         serverTransport.send('app.w = new ui.Window({ top: 0, left: 0 });app.w.show();app.w.on("ready", function() { app.wr = true; });', function(resp) {
             wait('app.wr === true', function() {
+                var ok = false;
                 serverTransport.send('app.w.on("close", function() { app.wc = true; });app.w.close();', function() {
                     wait('app.wc === true', function() {
-                        setTimeout(function() { test.done(); }, 300);
-                        clearTimeout(errTimeout);
+                        setTimeout(function() { ok = true; test.done(); }, 300);
                     });
                 });
-                var errTimeout = setTimeout(function() {
-                    test.fail('process exited on secondary window close');
-                    test.done();
-                }, 1000);
+                appProcess.once('exit', function() {
+                    if (!ok) {
+                        test.fail('process exited on secondary window close');
+                        test.done();
+                    }
+                });
             });
         });
     });
@@ -374,6 +376,24 @@ module.exports['messaging:client to server with callback'] = function(test) {
                     });
                 });
             });
+        });
+    });
+};
+
+module.exports['client window.close'] = function(test) {
+    test.expect(1);
+    start('', function() {
+        serverTransport.send('app.window.postMessage({ code: "window.close();" });', function() {
+            appProcess.on('exit', function() {
+                test.equal(appProcess.exitCode, 0);
+                setTimeout(function() { test.done(); }, actionTimeout);
+                clearTimeout(errTimeout);
+                test.done();
+            });
+            var errTimeout = setTimeout(function() {
+                test.fail('process not exited');
+                test.done();
+            }, 1000);
         });
     });
 };

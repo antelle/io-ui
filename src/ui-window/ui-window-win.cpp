@@ -10,6 +10,7 @@
 #include <shlguid.h>
 #include <Shlwapi.h>
 #include <Shlobj.h>
+#include <Shobjidl.h>
 #include <iostream>
 #include <iomanip>
 
@@ -577,7 +578,6 @@ STDMETHODIMP IoUiSite::Exec(const GUID *pguidCmdGroup, DWORD nCmdID, DWORD nCmde
     case OLECMDID_SHOWFIND:
     case OLECMDID_SHOWPAGESETUP:
     case OLECMDID_SHOWPRINT:
-    case OLECMDID_CLOSE:
     case OLECMDID_ALLOWUILESSSAVEAS:
     case OLECMDID_DONTDOWNLOADCSS:
     case OLECMDID_PRINT2:
@@ -592,6 +592,9 @@ STDMETHODIMP IoUiSite::Exec(const GUID *pguidCmdGroup, DWORD nCmdID, DWORD nCmde
     case 68://OLECMDID_SHOWTASKDLG:
     case 73://OLECMDID_USER_OPTICAL_ZOOM:
         return S_OK;
+    case OLECMDID_CLOSE:
+        _host->Close();
+        return S_OK;
     default:
         return OLECMDERR_E_NOTSUPPORTED;
     }
@@ -602,6 +605,11 @@ STDMETHODIMP IoUiSite::QueryStatus(const GUID *pguidCmdGroup, ULONG cCmds, OLECM
 }
 
 STDMETHODIMP IoUiSite::ShowMessage(HWND hwnd, LPOLESTR lpstrText, LPOLESTR lpstrCaption, DWORD dwType, LPOLESTR lpstrHelpFile, DWORD dwHelpContext, LRESULT *plResult) {
+    if ((dwType & MB_YESNO) && (dwType & MB_ICONQUESTION)) {
+        // window.close() => Do you want to close this window? Yes/No
+        *plResult = IDYES;
+        return S_OK;
+    }
     auto* title = _host->GetTitle();
     *plResult = MessageBox(_host->hwnd, lpstrText, *title, dwType);
     delete title;
@@ -674,7 +682,14 @@ STDMETHODIMP BrowserEventHandler::Invoke(DISPID dispidMember, REFIID riid, LCID 
         _eventHandler->TitleChange(pdispparams->rgvarg[0].bstrVal);
         return S_OK;
     case DISPID_NEWWINDOW3:
-        *pdispparams->rgvarg[3].pboolVal = VARIANT_TRUE; // cancel = true
+        if (pdispparams->rgvarg[2].intVal & NWMF_USERREQUESTED) {
+            // user has shift-clicked a link or opened a new window
+            *pdispparams->rgvarg[3].pboolVal = VARIANT_TRUE; // cancel = true
+        } else {
+            std::wcerr << L"NewWindow3 " << pdispparams->rgvarg[0].bstrVal << L" " << pdispparams->rgvarg[1].bstrVal << L" " << std::hex << pdispparams->rgvarg[2].intVal << L"\n";
+            *pdispparams->rgvarg[3].pboolVal = VARIANT_TRUE;
+            // *pdispparams->rgvarg[4].pdispVal = TODO: open new window
+        }
         return S_OK;
     default:
         return E_NOTIMPL;
@@ -1065,7 +1080,7 @@ void UiWindowWin::SelectFileSync(WindowOpenFileParams* params) {
             if (!vec.size())
                 vec.push_back(new Utf8String(selectedFile));
             result = new Utf8String*[vec.size() + 1];
-            for (auto i = 0; i < vec.size(); i++)
+            for (unsigned i = 0; i < vec.size(); i++)
                 result[i] = vec[i];
             result[vec.size()] = NULL;
         }
@@ -1093,7 +1108,6 @@ bool UiWindowWin::HandleAccelerator(MSG* msg) {
         case VK_ADD:
         case VK_OEM_MINUS:
         case VK_SUBTRACT:
-        case 0:
             // TODO: dispatch synthetic events
             if (GetKeyState(VK_CONTROL) & 0x8000)
                 return true;
