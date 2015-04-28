@@ -55,6 +55,7 @@ private:
         GdkEvent* event, WebKitHitTestResult* hitTest, gpointer data);
     static void WebViewTitleChanged(GObject* object, GParamSpec* pspec, gpointer data);
     static gboolean WebViewScriptDialog(WebKitWebView* webView, WebKitScriptDialog* dialog, gpointer data);
+    static void WebViewClose(WebKitWebView* webView, gpointer data);
     static void MsgExecutedCallback(GObject *object, GAsyncResult *res, gpointer data);
     static void MenuActivated(GtkWidget* widget, gpointer data);
     static gboolean PostMsgSync(gpointer arg);
@@ -190,6 +191,7 @@ void UiWindowLinux::ShowOsWindow() {
     g_signal_connect(_webView, "context-menu", G_CALLBACK(WebViewContextMenuRequested), this);
     g_object_connect(_webView, "signal::notify::title", G_CALLBACK(WebViewTitleChanged), this, NULL);
     g_signal_connect(_webView, "script-dialog", G_CALLBACK(WebViewScriptDialog), this);
+    g_signal_connect(_webView, "close", G_CALLBACK(WebViewClose), this);
     PerfTrace::Reg(UI_PERF_EVENT::UI_PERF_EVENT_INIT_BROWSER_CONTROL);
 
     gtk_widget_show_all(_window);
@@ -287,6 +289,11 @@ gboolean UiWindowLinux::WebViewScriptDialog(WebKitWebView* webView, WebKitScript
         return TRUE;
     }
     return FALSE;
+}
+
+void UiWindowLinux::WebViewClose(WebKitWebView* webView, gpointer data) {
+    auto win = (UiWindowLinux*)data;
+    win->Close();
 }
 
 // TODO: why does this throw an error?
