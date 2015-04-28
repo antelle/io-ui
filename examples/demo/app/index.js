@@ -22,6 +22,10 @@
         backend.postMessage({ selectFiles: true });
     };
 
+    document.getElementById('btn4').onclick = function() {
+       window.close();
+    };
+
     backend.onMessage = function(msg) {
         document.getElementById("res").innerHTML = JSON.stringify(msg);
         return { processed: 'ok' };
