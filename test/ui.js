@@ -306,9 +306,72 @@ module.exports['multi-window: close secondary'] = function(test) {
                         clearTimeout(errTimeout);
                     });
                 });
-                var errTimeout = appProcess.on('exit', function() {
+                var errTimeout = setTimeout(function() {
                     test.fail('process exited on secondary window close');
                     test.done();
+                }, 1000);
+            });
+        });
+    });
+};
+
+module.exports['messaging:server to client with callback'] = function(test) {
+    test.expect(1);
+    start('', function() {
+        serverTransport.send('app.window.postMessage({ code: "2+2" }, function(r) { app.execRes = { ret: r }; });', function() {
+            wait('app.execRes', function() {
+                serverTransport.send('app.execRes', function(execRes) {
+                    test.equal(execRes.data.ret.result, '4');
+                    test.done();
+                });
+            });
+        });
+    });
+};
+
+module.exports['messaging:server to client without callback'] = function(test) {
+    test.expect(1);
+    start('', function() {
+        serverTransport.send('app.window.postMessage({ code: "2+3" }); app.window.postMessage({ code: "2+2" }, function(r) { app.execRes = { ret: r }; });', function() {
+            wait('app.execRes', function() {
+                serverTransport.send('app.execRes', function(execRes) {
+                    test.equal(execRes.data.ret.result, 54);
+                    test.done();
+                });
+            });
+        });
+    });
+};
+
+module.exports['messaging:client to server without callback'] = function(test) {
+    test.expect(1);
+    start('', function() {
+        serverTransport.send('app.window.onMessage = function(r) { app.lastMsg = { ret: r }; };' +
+            'app.window.postMessage({ code: "backend.postMessage({ str: 123 });" });', function() {
+            wait('app.lastMsg', function() {
+                serverTransport.send('app.lastMsg', function(lastMsg) {
+                    test.equal(lastMsg.data.ret.str, 123);
+                    test.done();
+                });
+            });
+        });
+    });
+};
+
+module.exports['messaging:client to server with callback'] = function(test) {
+    test.expect(2);
+    start('', function() {
+        serverTransport.send('app.window.onMessage = function(r) { app.lastMsg = { ret: r }; return "#2"; };' +
+            'app.window.postMessage({ code: "backend.postMessage({ str: 123 }, function(sresp) { window.sresp = sresp; });\'#1\'" });', function() {
+            wait('app.lastMsg', function() {
+                serverTransport.send('app.lastMsg', function(lastMsg) {
+                    test.equal(lastMsg.data.ret.str, 123);
+                    serverTransport.send('app.window.postMessage({ code: "window.sresp" }, function(r) { app.execRes = { ret: r }; });', function() {
+                        serverTransport.send('app.execRes', function(execRes) {
+                            test.equal(execRes.data.ret.result, '#1#2');
+                            test.done();
+                        });
+                    });
                 });
             });
         });
