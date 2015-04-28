@@ -873,7 +873,10 @@ BOOL UiWindowWin::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
             EnableWindow(((UiWindowWin*)_parent)->hwnd, TRUE);
         return TRUE;
     case WM_CLOSE:
-        DestroyWindow(hwnd);
+        if (ShouldClose())
+            DestroyWindow(hwnd);
+        else
+            EmitEvent(new WindowEventData(WINDOW_EVENT_CLOSING));
         return true;
     case WM_CREATE:
         PerfTrace::Reg(UI_PERF_EVENT::UI_PERF_EVENT_CREATE_WINDOW);
