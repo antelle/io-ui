@@ -190,8 +190,20 @@ void UiWindow::InvokeEventCallback(Isolate* isolate, WindowEventData* data) {
         Handle<Value> argv[] = { String::NewFromUtf8(isolate, "ready") };
         emitFn->Call(hndl, 1, argv);
     }
+    else if (evt == WINDOW_EVENT_CLOSING) {
+        if (!_shouldClose) {
+            auto closeArg = Object::New(isolate);
+            Handle<Value> argv[] = { String::NewFromUtf8(isolate, "closing"), closeArg };
+            auto result = emitFn->Call(hndl, 2, argv);
+            result->BooleanValue();
+            _shouldClose = !closeArg->Get(String::NewFromUtf8(isolate, "cancel"))->BooleanValue();
+        }
+        if (_shouldClose) {
+            Close();
+        }
+    }
     else if (evt == WINDOW_EVENT_CLOSED) {
-        Handle<Value> argv[] = { String::NewFromUtf8(isolate, "close") };
+        Handle<Value> argv[] = { String::NewFromUtf8(isolate, "closed") };
         emitFn->Call(hndl, 1, argv);
     }
     else if (evt == WINDOW_EVENT_RESIZE) {
@@ -348,6 +360,10 @@ void UiWindow::SelectFile(const FunctionCallbackInfo<Value>& args) {
     if (!params->Title)
         params->Title = new Utf8String(String::NewFromUtf8(isolate, "Select file"));
     _this->SelectFile(params);
+}
+
+bool UiWindow::ShouldClose() {
+    return _shouldClose;
 }
 
 void UiWindow::GetOnMessage(Local<String> property, const PropertyCallbackInfo<Value>& info) {

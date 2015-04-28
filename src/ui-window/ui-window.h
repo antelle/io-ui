@@ -11,15 +11,16 @@
 
 enum WINDOW_EVENT : int {
     WINDOW_EVENT_READY = 1,
-    WINDOW_EVENT_CLOSED = 2,
-    WINDOW_EVENT_RESIZE = 3,
-    WINDOW_EVENT_STATE = 4,
-    WINDOW_EVENT_MOVE = 5,
-    WINDOW_EVENT_DOCUMENT_COMPLETE = 6,
-    WINDOW_EVENT_MENU = 7,
-    WINDOW_EVENT_MESSAGE = 8,
-    WINDOW_EVENT_MESSAGE_CALLBACK = 9,
-    WINDOW_EVENT_SELECT_FILE = 10,
+    WINDOW_EVENT_CLOSING = 2,
+    WINDOW_EVENT_CLOSED = 3,
+    WINDOW_EVENT_RESIZE = 4,
+    WINDOW_EVENT_STATE = 5,
+    WINDOW_EVENT_MOVE = 6,
+    WINDOW_EVENT_DOCUMENT_COMPLETE = 7,
+    WINDOW_EVENT_MENU = 8,
+    WINDOW_EVENT_MESSAGE = 9,
+    WINDOW_EVENT_MESSAGE_CALLBACK = 10,
+    WINDOW_EVENT_SELECT_FILE = 11,
 };
 
 struct WindowRect {
@@ -71,6 +72,7 @@ public:
     static int Main(int argc, char* argv[]);
     virtual ~UiWindow();
     static int Alert(Utf8String* msg, ALERT_TYPE type);
+    bool ShouldClose();
 
 protected:
     UiWindow();
@@ -153,4 +155,5 @@ private:
     static std::vector<WindowEventData*> _pendingEvents;
 
     static bool _isFirstWindowCreated;
+    bool _shouldClose = false;
 };

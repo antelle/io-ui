@@ -121,7 +121,9 @@ private:
 }
 
 - (BOOL)windowShouldClose:(id)window {
-    return YES;
+    if (!_window->ShouldClose())
+        _window->Emit(new WindowEventData(WINDOW_EVENT_CLOSING));
+    return _window->ShouldClose();
 }
 
 - (void)windowWillClose:(id)window {
@@ -277,6 +279,11 @@ contextMenuItemsForElement:(NSDictionary *)element
     return result == NSAlertFirstButtonReturn;
 }
 
+- (void)webViewClose:(WebView *)sender {
+    if (!_window->ShouldClose())
+        _window->Emit(new WindowEventData(WINDOW_EVENT_CLOSING));
+}
+
 @end
 
 bool UiWindowMac::_mainWindowShown = false;
@@ -393,10 +400,14 @@ UI_RESULT UiWindow::OsInitialize() {
 }
 
 void UiWindowMac::Close() {
-    dispatch_sync(dispatch_get_main_queue(), ^{
-        [_window orderOut: nil];
-        [_window close];
-    });
+    if (!ShouldClose()) {
+        EmitEvent(new WindowEventData(WINDOW_EVENT_CLOSING));
+    } else {
+        dispatch_sync(dispatch_get_main_queue(), ^{
+            [_window orderOut: nil];
+            [_window close];
+        });
+    }
 }
 
 void UiWindowMac::Navigate(Utf8String* url) {
