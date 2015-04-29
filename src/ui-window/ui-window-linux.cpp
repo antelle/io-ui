@@ -50,6 +50,7 @@ private:
     WindowRect _rect;
 
     static void WindowDestroyed(GtkWidget* widget, gpointer data);
+    static gint WindowDeleting(GtkWidget* widget, GdkEvent* event, gpointer data);
     static void WebViewLoadChanged(WebKitWebView* webView, WebKitLoadEvent loadEvent, gpointer data);
     static gboolean WebViewContextMenuRequested(WebKitWebView* webView, WebKitContextMenu* menu,
         GdkEvent* event, WebKitHitTestResult* hitTest, gpointer data);
@@ -181,6 +182,7 @@ void UiWindowLinux::ShowOsWindow() {
     gtk_window_set_keep_above(GTK_WINDOW(this->_window), _config->Topmost);
     gtk_widget_set_opacity(this->_window, _config->Opacity);
     g_signal_connect(_window, "destroy", G_CALLBACK(WindowDestroyed), this);
+    g_signal_connect(_window, "delete-event", G_CALLBACK(WindowDeleting), this);
 
     PerfTrace::Reg(UI_PERF_EVENT::UI_PERF_EVENT_CREATE_WINDOW);
 
@@ -232,6 +234,16 @@ void UiWindowLinux::WindowDestroyed(GtkWidget* widget, gpointer data) {
     win->EmitEvent(new WindowEventData(WINDOW_EVENT_CLOSED));
     if (win->_isMainWindow)
         gtk_main_quit();
+}
+
+gint UiWindowLinux::WindowDeleting(GtkWidget* widget, GdkEvent* event, gpointer data) {
+    UiWindowLinux* win = (UiWindowLinux*)data;
+    if (win->ShouldClose()) {
+        return FALSE;
+    } else {
+        win->EmitEvent(new WindowEventData(WINDOW_EVENT_CLOSING));
+        return TRUE;
+    }
 }
 
 void UiWindowLinux::WebViewLoadChanged(WebKitWebView* webView, WebKitLoadEvent loadEvent, gpointer data) {
