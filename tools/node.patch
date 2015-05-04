@@ -32,7 +32,7 @@ index 8886b74..118683b 100644
        }],
        [ 'OS in "linux freebsd openbsd solaris"', {
 diff --git a/node.gyp b/node.gyp
-index f60b294..991796c 100644
+index f60b294..c3a7022 100644
 --- a/node.gyp
 +++ b/node.gyp
 @@ -16,7 +16,7 @@
@@ -96,7 +96,7 @@ index f60b294..991796c 100644
        ],
  
        'conditions': [
-@@ -327,21 +345,37 @@
+@@ -327,21 +345,42 @@
          [ 'OS=="win"', {
            'sources': [
              'src/res/node.rc',
@@ -105,6 +105,10 @@ index f60b294..991796c 100644
 +            '../../src/ui-module/ui-module-win.cpp',
 +            '../../src/ui-window/ui-window-win.cpp',
 +            '../../src/ui-window/ui-window-win-web-host-msie.cpp',
++            '../../src/ui-window/ui-window-win-web-host-cef.cpp',
++          ],
++          'include_dirs': [
++            '../cef'
            ],
            'defines': [
              'FD_SETSIZE=1024',
@@ -119,7 +123,8 @@ index f60b294..991796c 100644
 +          'link_settings': {
 +            'libraries': [
 +              'Shlwapi.lib', 'ws2_32.lib', 'advapi32.lib', 'iphlpapi.lib', 'psapi.lib',
-+              'shell32.lib', 'winmm.lib', 'Ole32.lib', 'OleAut32.lib', 'Comctl32.lib', 'Comdlg32.lib'
++              'shell32.lib', 'winmm.lib', 'Ole32.lib', 'OleAut32.lib', 'Comctl32.lib', 'Comdlg32.lib',
++              '../cef/Release/libcef.lib', '../cef/out/Release/lib/libcef_dll_wrapper.lib'
 +            ]
 +          }
          }, { # POSIX
@@ -136,7 +141,7 @@ index f60b294..991796c 100644
            'defines!': [
              'PLATFORM="mac"',
            ],
-@@ -349,6 +383,20 @@
+@@ -349,6 +388,20 @@
              # we need to use node's preferred "darwin" rather than gyp's preferred "mac"
              'PLATFORM="darwin"',
            ],
@@ -157,7 +162,7 @@ index f60b294..991796c 100644
          }],
          [ 'OS=="freebsd"', {
            'libraries': [
-@@ -370,6 +418,42 @@
+@@ -370,6 +423,42 @@
              'PLATFORM="sunos"',
            ],
          }],
@@ -200,7 +205,7 @@ index f60b294..991796c 100644
          [
            'OS in "linux freebsd" and node_shared_v8=="false"', {
              'ldflags': [
-@@ -379,13 +463,22 @@
+@@ -379,13 +468,22 @@
        ],
        'msvs_settings': {
          'VCLinkerTool': {

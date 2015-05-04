@@ -208,14 +208,16 @@ public:
     virtual void SetSize(int width, int height);
     virtual void Navigate(LPCWSTR url);
     virtual bool HandleAccelerator(MSG* msg);
-    virtual bool ExecScript(LPCWSTR script, LPWSTR* ret = NULL, LPWSTR* ex = NULL);
-    virtual void ExecCallback(void* callback, LPCWSTR ret, LPCWSTR ex);
+    virtual void PostMessageToBrowser(LPCWSTR json, void* callback);
+    virtual void HandlePostMessageCallback(void* callback, LPCWSTR result, LPCWSTR error);
     virtual void Undo();
     virtual void Redo();
     virtual void Cut();
     virtual void Copy();
     virtual void Paste();
     virtual void SelectAll();
+
+    bool ExecScript(LPCWSTR script, LPWSTR* ret = NULL, LPWSTR* ex = NULL);
 };
 
 IUiWindowWebHost* CreateMsieWebHost(IUiWindow* window);
@@ -760,6 +762,19 @@ bool UiWindowWebHostMsie::HandleAccelerator(MSG* msg) {
     return hr == S_OK;
 }
 
+void UiWindowWebHostMsie::PostMessageToBrowser(LPCWSTR json, void* callback) {
+    WCHAR* script = new WCHAR[wcslen(json) + 128];
+    wcscpy(script, L"JSON.stringify(typeof backend.onMessage === 'function' ? backend.onMessage(");
+    wcscat(script, json);
+    wcscat(script, L"):null)");
+    LPWSTR ret;
+    LPWSTR ex;
+    if (ExecScript(json, &ret, &ex)) {
+        Window->HandlePostMessageCallback(callback, ret, ex);
+    }
+    delete script;
+}
+
 bool UiWindowWebHostMsie::ExecScript(LPCWSTR code, LPWSTR* ret, LPWSTR* ex) {
     IDispatch* doc;
     IDispatch* script = NULL;
@@ -816,22 +831,22 @@ bool UiWindowWebHostMsie::ExecScript(LPCWSTR code, LPWSTR* ret, LPWSTR* ex) {
     return SUCCEEDED(hr);
 }
 
-void UiWindowWebHostMsie::ExecCallback(void* callback, LPCWSTR ret, LPCWSTR ex) {
+void UiWindowWebHostMsie::HandlePostMessageCallback(void* callback, LPCWSTR result, LPCWSTR error) {
     IDispatch* dispCallback = (IDispatch*)callback;
     DISPPARAMS params = { 0 };
     params.cArgs = 2;
     params.rgvarg = new VARIANTARG[2];
     VariantInit(&params.rgvarg[0]);
     VariantInit(&params.rgvarg[1]);
-    if (ret) {
+    if (result) {
         params.rgvarg[1].vt = VT_BSTR;
-        params.rgvarg[1].bstrVal = SysAllocString(ret);
+        params.rgvarg[1].bstrVal = SysAllocString(result);
     } else {
         params.rgvarg[1].vt = VT_NULL;
     }
-    if (ex) {
+    if (error) {
         params.rgvarg[0].vt = VT_BSTR;
-        params.rgvarg[0].bstrVal = SysAllocString(ex);
+        params.rgvarg[0].bstrVal = SysAllocString(error);
     } else {
         params.rgvarg[0].vt = VT_NULL;
     }

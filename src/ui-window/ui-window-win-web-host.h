@@ -10,8 +10,8 @@ public:
     virtual void SetSize(int width, int height) = 0;
     virtual void Navigate(LPCWSTR url) = 0;
     virtual bool HandleAccelerator(MSG* msg) = 0;
-    virtual bool ExecScript(LPCWSTR code, LPWSTR* ret = NULL, LPWSTR* ex = NULL) = 0;
-    virtual void ExecCallback(void* callback, LPCWSTR ret, LPCWSTR ex) = 0;
+    virtual void PostMessageToBrowser(LPCWSTR json, void* callback) = 0;
+    virtual void HandlePostMessageCallback(void* callback, LPCWSTR result, LPCWSTR error) = 0;
     virtual void Undo() = 0;
     virtual void Redo() = 0;
     virtual void Cut() = 0;
@@ -20,6 +20,8 @@ public:
     virtual void SelectAll() = 0;
 };
 
+typedef void(*MsgLoopTaskFn)(LPMSG);
+
 class IUiWindow {
 public:
     virtual operator HWND() = 0;
@@ -27,5 +29,7 @@ public:
     virtual void DownloadComplete() = 0;
     virtual void DocumentComplete() = 0;
     virtual void PostMessageToBackend(LPCWSTR msg, void* callback) = 0;
+    virtual void HandlePostMessageCallback(void* callback, LPCWSTR result, LPCWSTR error) = 0;
     virtual LPCSTR GetEngineVersion() = 0;
+    virtual void SetMessageLoopTask(MsgLoopTaskFn task) = 0;
 };

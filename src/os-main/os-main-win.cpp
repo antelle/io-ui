@@ -1,6 +1,8 @@
 #include "../ui-module/ui-module.h"
 #include <windows.h>
 
+extern int ExecCefSubprocessMain();
+
 int CALLBACK wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow) {
     int argc;
     LPWSTR* wargv = CommandLineToArgvW(GetCommandLineW(), &argc);
@@ -23,6 +25,11 @@ int CALLBACK wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmd
             // This should never happen.
             fprintf(stderr, "Could not convert arguments to utf8.");
             exit(1);
+        }
+    }
+    for (int i = 0; i < argc; i++) {
+        if (!strncmp(argv[i], "--type=", 7)) {
+            return ExecCefSubprocessMain();
         }
     }
     return UiModule::Main(argc, argv);

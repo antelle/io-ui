@@ -4,6 +4,7 @@
 #include "ui-window-win-web-host.h"
 #include <Windows.h>
 #include <Shlobj.h>
+#include <iostream>
 
 #define WM_USER_CREATE_WINDOW (WM_APP + 1)
 #define WM_USER_NAVIGATE (WM_APP + 2)
@@ -14,6 +15,7 @@
 #define BASE_DPI 96
 
 extern IUiWindowWebHost* CreateMsieWebHost(IUiWindow* window);
+extern IUiWindowWebHost* CreateCefWebHost(IUiWindow* window);
 
 struct MsgCallbackParam {
     void* Callback;
@@ -53,6 +55,7 @@ public:
     static WCHAR _wndClassName[];
     static DWORD _mainThreadId;
     static int _dpi;
+    static MsgLoopTaskFn _mainLoopTask;
 
     BOOL HandleMessage(UINT, WPARAM, LPARAM);
     bool HandleAccelerator(MSG* msg);
@@ -64,7 +67,9 @@ public:
     virtual void DownloadComplete();
     virtual void DocumentComplete();
     virtual void PostMessageToBackend(LPCWSTR msg, void* callback);
+    virtual void HandlePostMessageCallback(void* callback, LPCWSTR result, LPCWSTR error);
     virtual LPCSTR GetEngineVersion();
+    virtual void SetMessageLoopTask(MsgLoopTaskFn task);
 
 private:
     IUiWindowWebHost* _webHost;
@@ -92,6 +97,7 @@ private:
 WCHAR UiWindowWin::_wndClassName[] = L"IoUiWnd";
 DWORD UiWindowWin::_mainThreadId = 0;
 int UiWindowWin::_dpi = BASE_DPI;
+MsgLoopTaskFn UiWindowWin::_mainLoopTask = NULL;
 
 int UiWindow::Main(int argc, char* argv[]) {
     MSG msg;
@@ -110,6 +116,9 @@ int UiWindow::Main(int argc, char* argv[]) {
         }
         TranslateMessage(&msg);
         DispatchMessage(&msg);
+        if (UiWindowWin::_mainLoopTask) {
+            UiWindowWin::_mainLoopTask(&msg);
+        }
     }
     return 0;
 }
@@ -261,24 +270,13 @@ void UiWindowWin::NavigateSync(Utf8String* url) {
 }
 
 void UiWindowWin::PostMsgSync(Utf8String* msg, long callback) {
-    WCHAR* script = new WCHAR[wcslen(*msg) + 128];
-    wcscpy(script, L"JSON.stringify(typeof backend.onMessage === 'function' ? backend.onMessage(");
-    wcscat(script, *msg);
-    wcscat(script, L"):null)");
+    _webHost->PostMessageToBrowser(*msg, (void*)callback);
     delete msg;
-    LPWSTR result;
-    LPWSTR error;
-    if (_webHost->ExecScript(script, &result, &error) && callback) {
-        Utf8String* resultStr = result ? new Utf8String(result) : NULL;
-        Utf8String* errorStr = error ? new Utf8String(error) : NULL;
-        EmitEvent(new WindowEventData(WINDOW_EVENT_MESSAGE_CALLBACK, callback, (long)resultStr, (long)errorStr));
-    }
-    delete script;
 }
 
 void UiWindowWin::PostMsgCbSync(MsgCallbackParam* cb) {
     if (cb->Callback) {
-        _webHost->ExecCallback(cb->Callback, cb->Result ? (LPCWSTR)*cb->Result : NULL, cb->Error ? (LPCWSTR)*cb->Error : NULL);
+        _webHost->HandlePostMessageCallback(cb->Callback, cb->Result ? (LPCWSTR)*cb->Result : NULL, cb->Error ? (LPCWSTR)*cb->Error : NULL);
     }
     if (cb->Result)
         delete cb->Result;
@@ -412,7 +410,8 @@ void UiWindowWin::ShowOsWindow() {
 }
 
 void UiWindowWin::CreateWebHost() {
-    _webHost = CreateMsieWebHost(this);
+    //_webHost = CreateMsieWebHost(this);
+    _webHost = CreateCefWebHost(this);
     _webHost->Initialize();
 }
 
@@ -573,8 +572,20 @@ void UiWindowWin::PostMessageToBackend(LPCWSTR msg, void* callback) {
     EmitEvent(new WindowEventData(WINDOW_EVENT_MESSAGE, (long)msgStr, (long)callback));
 }
 
+void UiWindowWin::HandlePostMessageCallback(void* callback, LPCWSTR result, LPCWSTR error) {
+    if (callback) {
+        Utf8String* resultStr = result ? new Utf8String(result) : NULL;
+        Utf8String* errorStr = error ? new Utf8String(error) : NULL;
+        EmitEvent(new WindowEventData(WINDOW_EVENT_MESSAGE_CALLBACK, (long)callback, (long)resultStr, (long)errorStr));
+    }
+}
+
 LPCSTR UiWindowWin::GetEngineVersion() {
     return UiModule::GetEngineVersion();
+}
+
+void UiWindowWin::SetMessageLoopTask(MsgLoopTaskFn task) {
+    UiWindowWin::_mainLoopTask = task;
 }
 
 WindowRect UiWindowWin::GetWindowRect() {
