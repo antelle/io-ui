@@ -32,7 +32,7 @@ index 8886b74..118683b 100644
        }],
        [ 'OS in "linux freebsd openbsd solaris"', {
 diff --git a/node.gyp b/node.gyp
-index f60b294..e7dc36c 100644
+index f60b294..991796c 100644
 --- a/node.gyp
 +++ b/node.gyp
 @@ -16,7 +16,7 @@
@@ -96,7 +96,7 @@ index f60b294..e7dc36c 100644
        ],
  
        'conditions': [
-@@ -327,21 +345,36 @@
+@@ -327,21 +345,37 @@
          [ 'OS=="win"', {
            'sources': [
              'src/res/node.rc',
@@ -104,6 +104,7 @@ index f60b294..e7dc36c 100644
 +            '../../src/perf-trace/perf-trace-win.cpp',
 +            '../../src/ui-module/ui-module-win.cpp',
 +            '../../src/ui-window/ui-window-win.cpp',
++            '../../src/ui-window/ui-window-win-web-host-msie.cpp',
            ],
            'defines': [
              'FD_SETSIZE=1024',
@@ -135,7 +136,7 @@ index f60b294..e7dc36c 100644
            'defines!': [
              'PLATFORM="mac"',
            ],
-@@ -349,6 +382,20 @@
+@@ -349,6 +383,20 @@
              # we need to use node's preferred "darwin" rather than gyp's preferred "mac"
              'PLATFORM="darwin"',
            ],
@@ -156,7 +157,7 @@ index f60b294..e7dc36c 100644
          }],
          [ 'OS=="freebsd"', {
            'libraries': [
-@@ -370,6 +417,42 @@
+@@ -370,6 +418,42 @@
              'PLATFORM="sunos"',
            ],
          }],
@@ -199,7 +200,7 @@ index f60b294..e7dc36c 100644
          [
            'OS in "linux freebsd" and node_shared_v8=="false"', {
              'ldflags': [
-@@ -379,13 +462,22 @@
+@@ -379,13 +463,22 @@
        ],
        'msvs_settings': {
          'VCLinkerTool': {

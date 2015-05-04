@@ -45,24 +45,24 @@ app.server.backend = function (req, res) {
     }
     throw 'err';
 };
+app.window.onMessage = function(msg) {
+    console.log('Message received: ' + JSON.stringify(msg));
+    if (msg.selectFiles) {
+        app.window.selectFile({
+            open: true,
+            title: 'Select a file',
+            dirs: false,
+            ext: ['js', 'md', '*'],
+            multiple: true,
+            complete: function(files) {
+                app.window.postMessage({ selectedFiles: files });
+            }
+        });
+    }
+    return { result: 'ok' };
+};
 app.window.once('documentComplete', function () {
     app.window.postMessage({ text: "Hello from backend" }, function(res, err) {
         console.log('Message processed: ' + (err ? 'ERROR: ' + err : JSON.stringify(res)));
     });
-    app.window.onMessage = function(msg) {
-        console.log('Message received: ' + JSON.stringify(msg));
-        if (msg.selectFiles) {
-            app.window.selectFile({
-                open: true,
-                title: 'Select a file',
-                dirs: false,
-                ext: ['js', 'md', '*'],
-                multiple: true,
-                complete: function(files) {
-                    app.window.postMessage({ selectedFiles: files });
-                }
-            });
-        }
-        return { result: 'ok' };
-    };
 });

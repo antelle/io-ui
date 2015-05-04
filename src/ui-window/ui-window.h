@@ -4,7 +4,6 @@
 #include <node_object_wrap.h>
 #include <v8.h>
 #include <uv.h>
-#include <vector>
 #include "../utf8-string.h"
 #include "../window-config.h"
 #include "../const.h"
@@ -43,6 +42,7 @@ struct WindowEventData {
     long Arg1;
     long Arg2;
     long Arg3;
+    WindowEventData* Next = NULL;
 
     WindowEventData(WINDOW_EVENT evt, long arg1 = 0, long arg2 = 0, long arg3 = 0) : Evt(evt), Arg1(arg1), Arg2(arg2), Arg3(arg3) {}
 };
@@ -152,7 +152,7 @@ private:
 
     static uv_async_t _uvAsyncHandle;
     static uv_mutex_t _pendingEventsLock;
-    static std::vector<WindowEventData*> _pendingEvents;
+    static WindowEventData* _pendingEvents;
 
     static bool _isFirstWindowCreated;
     bool _shouldClose = false;

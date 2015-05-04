@@ -9,7 +9,7 @@ Persistent<Function> UiWindow::constructor;
 bool UiWindow::_isFirstWindowCreated = false;
 uv_async_t UiWindow::_uvAsyncHandle;
 uv_mutex_t UiWindow::_pendingEventsLock;
-std::vector<WindowEventData*> UiWindow::_pendingEvents;
+WindowEventData* UiWindow::_pendingEvents;
 
 UiWindow::UiWindow() : _isMainWindow(!_isFirstWindowCreated) {
     _isFirstWindowCreated = true;
@@ -169,14 +169,15 @@ void UiWindow::AsyncCallback(uv_async_t *handle) {
     HandleScope scope(isolate);
 
     uv_mutex_lock(&_pendingEventsLock);
-    std::vector<WindowEventData*> pendingEvents(_pendingEvents);
-    _pendingEvents.clear();
+    WindowEventData* ev = _pendingEvents;
+    _pendingEvents = NULL;
     uv_mutex_unlock(&_pendingEventsLock);
 
-    for (auto iter = pendingEvents.begin(); iter != pendingEvents.end(); iter++) {
-        WindowEventData* data = *iter;
-        data->Sender->InvokeEventCallback(isolate, data);
-        delete data;
+    while (ev) {
+        ev->Sender->InvokeEventCallback(isolate, ev);
+        WindowEventData* prev = ev;
+        ev = ev->Next;
+        delete prev;
     }
 }
 
@@ -303,10 +304,14 @@ void UiWindow::InvokeEventCallback(Isolate* isolate, WindowEventData* data) {
     }
 }
 
-void UiWindow::EmitEvent(WindowEventData* asyncData) {
-    asyncData->Sender = this;
+void UiWindow::EmitEvent(WindowEventData* ev) {
+    ev->Sender = this;
     uv_mutex_lock(&_pendingEventsLock);
-    _pendingEvents.push_back(asyncData);
+    WindowEventData** ptr = &_pendingEvents;
+    while (*ptr) {
+        ptr = &(*ptr)->Next;
+    }
+    *ptr = ev;
     uv_mutex_unlock(&_pendingEventsLock);
     uv_async_send(&this->_uvAsyncHandle);
 }
