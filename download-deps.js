@@ -64,7 +64,7 @@ function existsInPath(program) {
 
 process.chdir(__dirname);
 if (process.platform === 'win32' && !fs.existsSync('deps/cef')) {
-    console.warn('[!] Automatic CEF download is not allowed by CEF project authors.' +
+    console.warn('[!] Automatic CEF download is not allowed by CEF project authors. ' +
         'Please download Win32 build manually and unarchive to deps/cef: \n' +
         '  http://www.magpcss.net/cef_downloads/');
 }
