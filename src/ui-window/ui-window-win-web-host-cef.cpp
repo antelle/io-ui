@@ -92,7 +92,6 @@ public:
     void CreateWebView();
 
     static void InitializeApp(UiWindowWebHostCef* mainWindowHost);
-    static void MainLoopWork(LPMSG msg);
 
     static IoUiCefApp* App;
 
@@ -119,17 +118,6 @@ public:
 IoUiCefApp* UiWindowWebHostCef::App = NULL;
 
 IUiWindowWebHost* CreateCefWebHost(IUiWindow* window);
-int ExecCefSubprocessMain();
-
-#pragma endregion
-
-#pragma region App Support
-
-int ExecCefSubprocessMain() {
-    CefMainArgs mainArgs(GetModuleHandle(NULL));
-    CefRefPtr<IoUiCefApp> app(new IoUiCefApp(NULL));
-    return CefExecuteProcess(mainArgs, app.get(), NULL);
-}
 
 #pragma endregion
 
@@ -325,15 +313,11 @@ void UiWindowWebHostCef::InitializeApp(UiWindowWebHostCef* mainWindowHost) {
     UiWindowWebHostCef::App = new IoUiCefApp(mainWindowHost);
     CefRefPtr<IoUiCefApp> app(UiWindowWebHostCef::App);
     CefSettings appSettings;
+    appSettings.single_process = true;
     appSettings.no_sandbox = true;
-    appSettings.log_severity = LOGSEVERITY_VERBOSE;
+    appSettings.log_severity = LOGSEVERITY_DISABLE;
     CefMainArgs mainArgs(GetModuleHandle(NULL));
     CefInitialize(mainArgs, appSettings, app.get(), NULL);
-    mainWindowHost->Window->SetMessageLoopTask(UiWindowWebHostCef::MainLoopWork);
-}
-
-void UiWindowWebHostCef::MainLoopWork(LPMSG msg) {
-    CefDoMessageLoopWork();
 }
 
 UiWindowWebHostCef::UiWindowWebHostCef(IUiWindow* window) : Window(window) {
@@ -344,15 +328,19 @@ void UiWindowWebHostCef::CreateWebView() {
         return;
     }
     CefHandler = new IoUiCefHandler(this);
+    CefHandler->AddRef();
     RECT rect;
     GetClientRect(*Window, &rect);
     CefWindowInfo windowInfo;
     windowInfo.SetAsChild(*Window, rect);
     CefRefPtr<IoUiCefHandler> handler(CefHandler);
     CefBrowserSettings browserSettings;
+    browserSettings.java = STATE_DISABLED;
+    browserSettings.plugins = STATE_DISABLED;
+    browserSettings.web_security = STATE_DISABLED;
     auto browser = CefBrowserHost::CreateBrowserSync(windowInfo, handler.get(), "", browserSettings, NULL);
-    browser->AddRef();
     Browser = browser.get();
+    Browser->AddRef();
 }
 
 void UiWindowWebHostCef::Initialize() {
@@ -369,7 +357,6 @@ void UiWindowWebHostCef::Destroy() {
     }
     if (CefHandler) {
         CefHandler->Release();
-        delete CefHandler;
     }
 }
 

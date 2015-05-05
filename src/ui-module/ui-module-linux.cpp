@@ -15,3 +15,6 @@ UI_RESULT UiModule::OsInitialize() {
     strcpy(_engineVersion, ver);
     return UI_S_OK;
 }
+
+UI_RESULT UiModule::OsSetEngineVersion() {
+}

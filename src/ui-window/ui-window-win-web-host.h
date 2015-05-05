@@ -20,8 +20,6 @@ public:
     virtual void SelectAll() = 0;
 };
 
-typedef void(*MsgLoopTaskFn)(LPMSG);
-
 class IUiWindow {
 public:
     virtual operator HWND() = 0;
@@ -31,5 +29,7 @@ public:
     virtual void PostMessageToBackend(LPCWSTR msg, void* callback) = 0;
     virtual void HandlePostMessageCallback(void* callback, LPCWSTR result, LPCWSTR error) = 0;
     virtual LPCSTR GetEngineVersion() = 0;
-    virtual void SetMessageLoopTask(MsgLoopTaskFn task) = 0;
 };
+
+IUiWindowWebHost* CreateCefWebHost(IUiWindow* window);
+IUiWindowWebHost* CreateMsieWebHost(IUiWindow* window);

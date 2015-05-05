@@ -32,7 +32,7 @@ index 8886b74..118683b 100644
        }],
        [ 'OS in "linux freebsd openbsd solaris"', {
 diff --git a/node.gyp b/node.gyp
-index f60b294..c3a7022 100644
+index f60b294..eaae77d 100644
 --- a/node.gyp
 +++ b/node.gyp
 @@ -16,7 +16,7 @@
@@ -205,12 +205,13 @@ index f60b294..c3a7022 100644
          [
            'OS in "linux freebsd" and node_shared_v8=="false"', {
              'ldflags': [
-@@ -379,13 +468,22 @@
+@@ -379,13 +468,23 @@
        ],
        'msvs_settings': {
          'VCLinkerTool': {
 -          'SubSystem': 1, # /subsystem:console
 +          'SubSystem': 2, # /subsystem:windows
++          'DelayLoadDLLs': 'libcef.dll',
 +          'target_conditions': [
 +            ['_type=="executable"', {
 +              'SubSystem': 2, # windows executable

@@ -9,13 +9,16 @@ public:
     static void Init(v8::Handle<v8::Object> exports);
     static int Main(int argc, char* argv[]);
     static char* GetEngineVersion();
+    static bool IsCef();
 private:
+    static void UpdateEngineVersion(const v8::FunctionCallbackInfo<v8::Value>& args);
     static void GetPerfStat(const v8::FunctionCallbackInfo<v8::Value>& args);
     static void Alert(const v8::FunctionCallbackInfo<v8::Value>& args);
 
     static v8::Persistent<v8::Object> EnginePropsPersistent;
 
     static UI_RESULT OsInitialize();
+    static UI_RESULT OsSetEngineVersion();
     static void StartNode(void* arg);
 
     static uv_mutex_t _initMutex;

@@ -70,9 +70,14 @@ char* UiModule::GetEngineVersion() {
     return _engineVersion;
 }
 
+bool UiModule::IsCef() {
+    return strcmp(_engineName, "cef") == 0;
+}
+
 void UiModule::Init(Handle<Object> exports) {
     Isolate* isolate = Isolate::GetCurrent();
     HandleScope scope(isolate);
+    NODE_SET_METHOD(exports, "updateEngineVersion", UiModule::UpdateEngineVersion);
     NODE_SET_METHOD(exports, "getPerfStat", UiModule::GetPerfStat);
     NODE_SET_METHOD(exports, "alert", UiModule::Alert);
     exports->Set(String::NewFromUtf8(isolate, "ALERT_ERROR"), Int32::New(isolate, ALERT_TYPE::ALERT_ERROR));
@@ -90,6 +95,16 @@ void UiModule::Init(Handle<Object> exports) {
     exports->Set(String::NewFromUtf8(isolate, "engine"), engineProps);
     EnginePropsPersistent.Reset(isolate, engineProps);
     uv_mutex_unlock(&_initMutex);
+}
+
+void UiModule::UpdateEngineVersion(const v8::FunctionCallbackInfo<v8::Value>& args) {
+    auto res = OsSetEngineVersion();
+    if (UI_SUCCEEDED(res)) {
+        auto isolate = Isolate::GetCurrent();
+        auto engineProps = Local<Object>::New(isolate, EnginePropsPersistent);
+        engineProps->Set(String::NewFromUtf8(isolate, "name"), String::NewFromUtf8(isolate, _engineName));
+        engineProps->Set(String::NewFromUtf8(isolate, "version"), String::NewFromUtf8(isolate, _engineVersion));
+    }
 }
 
 void UiModule::GetPerfStat(const FunctionCallbackInfo<Value>& args) {

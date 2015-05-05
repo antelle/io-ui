@@ -4,7 +4,9 @@
 #include "ui-window-win-web-host.h"
 #include <Windows.h>
 #include <Shlobj.h>
+#include <include/cef_app.h>
 #include <iostream>
+#include <iomanip>
 
 #define WM_USER_CREATE_WINDOW (WM_APP + 1)
 #define WM_USER_NAVIGATE (WM_APP + 2)
@@ -13,9 +15,6 @@
 #define WM_USER_SELECT_FILE (WM_APP + 5)
 
 #define BASE_DPI 96
-
-extern IUiWindowWebHost* CreateMsieWebHost(IUiWindow* window);
-extern IUiWindowWebHost* CreateCefWebHost(IUiWindow* window);
 
 struct MsgCallbackParam {
     void* Callback;
@@ -55,7 +54,7 @@ public:
     static WCHAR _wndClassName[];
     static DWORD _mainThreadId;
     static int _dpi;
-    static MsgLoopTaskFn _mainLoopTask;
+    static bool _isCef;
 
     BOOL HandleMessage(UINT, WPARAM, LPARAM);
     bool HandleAccelerator(MSG* msg);
@@ -69,7 +68,6 @@ public:
     virtual void PostMessageToBackend(LPCWSTR msg, void* callback);
     virtual void HandlePostMessageCallback(void* callback, LPCWSTR result, LPCWSTR error);
     virtual LPCSTR GetEngineVersion();
-    virtual void SetMessageLoopTask(MsgLoopTaskFn task);
 
 private:
     IUiWindowWebHost* _webHost;
@@ -97,7 +95,7 @@ private:
 WCHAR UiWindowWin::_wndClassName[] = L"IoUiWnd";
 DWORD UiWindowWin::_mainThreadId = 0;
 int UiWindowWin::_dpi = BASE_DPI;
-MsgLoopTaskFn UiWindowWin::_mainLoopTask = NULL;
+bool UiWindowWin::_isCef = false;
 
 int UiWindow::Main(int argc, char* argv[]) {
     MSG msg;
@@ -116,9 +114,12 @@ int UiWindow::Main(int argc, char* argv[]) {
         }
         TranslateMessage(&msg);
         DispatchMessage(&msg);
-        if (UiWindowWin::_mainLoopTask) {
-            UiWindowWin::_mainLoopTask(&msg);
+        if (UiWindowWin::_isCef) {
+            CefDoMessageLoopWork();
         }
+    }
+    if (UiWindowWin::_isCef) {
+        CefShutdown();
     }
     return 0;
 }
@@ -186,12 +187,14 @@ LRESULT CALLBACK UiWindowWin::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LP
 BOOL UiWindowWin::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
     switch (uMsg) {
     case WM_DESTROY:
-        EmitEvent(new WindowEventData(WINDOW_EVENT_CLOSED));
         _webHost->Destroy();
         _webHost = NULL;
         SetWindowLong(hwnd, GWL_USERDATA, (long)NULL);
+        EmitEvent(new WindowEventData(WINDOW_EVENT_CLOSED));
         if (_isMainWindow)
             PostQuitMessage(0);
+        if (_isCef)
+            CefQuitMessageLoop();
         if (_parent)
             EnableWindow(((UiWindowWin*)_parent)->hwnd, TRUE);
         return TRUE;
@@ -410,8 +413,8 @@ void UiWindowWin::ShowOsWindow() {
 }
 
 void UiWindowWin::CreateWebHost() {
-    //_webHost = CreateMsieWebHost(this);
-    _webHost = CreateCefWebHost(this);
+    _isCef = UiModule::IsCef();
+    _webHost = _isCef ? CreateCefWebHost(this) : CreateMsieWebHost(this);
     _webHost->Initialize();
 }
 
@@ -582,10 +585,6 @@ void UiWindowWin::HandlePostMessageCallback(void* callback, LPCWSTR result, LPCW
 
 LPCSTR UiWindowWin::GetEngineVersion() {
     return UiModule::GetEngineVersion();
-}
-
-void UiWindowWin::SetMessageLoopTask(MsgLoopTaskFn task) {
-    UiWindowWin::_mainLoopTask = task;
 }
 
 WindowRect UiWindowWin::GetWindowRect() {
