@@ -18,6 +18,8 @@ To download dependencies and build the project with examples, use:
 
 - `make`
 
+On windows, CEF is required and must be download manually into deps/cef folder. It can be downloaded from here: http://www.magpcss.net/cef_downloads/ (win32 build). After downloading, you should build libcef_dll_wrapper project in Release configuration.
+
 Run unit tests with:
 
 - `nodeunit`
