@@ -22,6 +22,6 @@ UI_RESULT UiModule::OsSetEngineVersion() {
     return UI_S_OK;
 }
 
-char* OsGetSupportedCefVersion() {
+char* UiModule::OsGetSupportedCefVersion() {
     return NULL;
 }
