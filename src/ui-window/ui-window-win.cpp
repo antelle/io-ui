@@ -163,10 +163,13 @@ UiWindowWin::UiWindowWin() {
 }
 
 int UiWindow::Alert(Utf8String* msg, ALERT_TYPE type) {
-    MessageBox(HWND_DESKTOP, *msg, L"Error",
-        (type == ALERT_TYPE::ALERT_ERROR ? MB_ICONERROR : MB_ICONINFORMATION)
-        | MB_OK);
-    return 0;
+    DWORD msgType = MB_ICONINFORMATION | MB_OK;
+    if (type == ALERT_TYPE::ALERT_ERROR)
+        msgType = MB_ICONERROR | MB_OK;
+    else if (type == ALERT_TYPE::ALERT_QUESTION)
+        msgType = MB_ICONQUESTION | MB_YESNO | MB_DEFBUTTON1;
+    auto result = MessageBox(HWND_DESKTOP, *msg, L"Error", msgType);
+    return ((type == ALERT_TYPE::ALERT_QUESTION) && (result == IDYES));
 }
 
 LRESULT CALLBACK UiWindowWin::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
@@ -612,7 +615,7 @@ Utf8String* UiWindowWin::GetTitle() {
     WCHAR* title = new WCHAR[len + 1];
     int res = GetWindowText(hwnd, title, len + 1);
     if (!res) {
-        delete title;
+        delete[] title;
         return NULL;
     }
     return new Utf8String(title);

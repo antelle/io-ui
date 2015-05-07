@@ -291,7 +291,7 @@ void UiWindow::InvokeEventCallback(Isolate* isolate, WindowEventData* data) {
                 resArr->Set(i, *result[i]);
                 delete result[i];
             }
-            delete result;
+            delete[] result;
         } else {
             callbackResult = (Handle<Value>)Null(isolate);
         }

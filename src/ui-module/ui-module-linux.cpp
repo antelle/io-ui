@@ -8,6 +8,10 @@
 using namespace v8;
 
 UI_RESULT UiModule::OsInitialize() {
+    return OsSetEngineVersion();
+}
+
+UI_RESULT UiModule::OsSetEngineVersion() {
     _engineName = (char*)"webkitgtk";
     char ver[64];
     sprintf(ver, "%d.%d.%d", webkit_get_major_version(), webkit_get_minor_version(), webkit_get_micro_version());
@@ -16,5 +20,6 @@ UI_RESULT UiModule::OsInitialize() {
     return UI_S_OK;
 }
 
-UI_RESULT UiModule::OsSetEngineVersion() {
+char* OsGetSupportedCefVersion() {
+    return NULL;
 }

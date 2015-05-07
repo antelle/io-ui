@@ -372,7 +372,7 @@ gboolean UiWindowLinux::PostMsgSync(gpointer arg) {auto pa = (PostMsgArg*)arg;
     strcat(script, "):null)");
     delete pa->msg;
     webkit_web_view_run_javascript(pa->win->_webView, script, NULL, MsgExecutedCallback, pa);
-    delete script;
+    delete[] script;
     return false;
 }
 
@@ -423,7 +423,7 @@ gboolean UiWindowLinux::MsgCallbackSync(gpointer data) {
             arg->callback
         );
         webkit_web_view_run_javascript(arg->win->_webView, script, NULL, NULL, NULL);
-        delete script;
+        delete[] script;
     }
     if (arg->result)
         delete arg->result;

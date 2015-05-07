@@ -46,7 +46,7 @@ Utf8String::Utf8String(Handle<Value> val) {
 }
 
 Utf8String::~Utf8String() {
-    delete _val;
+    delete[] _val;
 }
 
 Utf8String::operator v8::Handle<v8::Value>() const {

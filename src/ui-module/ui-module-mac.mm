@@ -7,6 +7,10 @@
 using namespace v8;
 
 UI_RESULT UiModule::OsInitialize() {
+    return OsSetEngineVersion();
+}
+
+UI_RESULT UiModule::OsSetEngineVersion() {
     _engineName = (char*)"webkit";
     NSString* webkitPath = @"/System/Library/Frameworks/WebKit.framework/Resources/Info.plist";
     NSDictionary* webkitDict = [[NSDictionary alloc] initWithContentsOfFile:webkitPath];
@@ -18,5 +22,6 @@ UI_RESULT UiModule::OsInitialize() {
     return UI_S_OK;
 }
 
-UI_RESULT UiModule::OsSetEngineVersion() {
+char* OsGetSupportedCefVersion() {
+    return NULL;
 }

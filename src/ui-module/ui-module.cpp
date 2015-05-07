@@ -78,10 +78,12 @@ void UiModule::Init(Handle<Object> exports) {
     Isolate* isolate = Isolate::GetCurrent();
     HandleScope scope(isolate);
     NODE_SET_METHOD(exports, "updateEngineVersion", UiModule::UpdateEngineVersion);
+    NODE_SET_METHOD(exports, "getSupportedCefVersion", UiModule::GetSupportedCefVersion);
     NODE_SET_METHOD(exports, "getPerfStat", UiModule::GetPerfStat);
     NODE_SET_METHOD(exports, "alert", UiModule::Alert);
     exports->Set(String::NewFromUtf8(isolate, "ALERT_ERROR"), Int32::New(isolate, ALERT_TYPE::ALERT_ERROR));
     exports->Set(String::NewFromUtf8(isolate, "ALERT_INFO"), Int32::New(isolate, ALERT_TYPE::ALERT_INFO));
+    exports->Set(String::NewFromUtf8(isolate, "ALERT_QUESTION"), Int32::New(isolate, ALERT_TYPE::ALERT_QUESTION));
     exports->Set(String::NewFromUtf8(isolate, "version"), String::NewFromUtf8(isolate, UI_MODULE_VERSION));
     uv_mutex_lock(&_initMutex);
     if (UI_FAILED(_initCode)) {
@@ -105,6 +107,14 @@ void UiModule::UpdateEngineVersion(const v8::FunctionCallbackInfo<v8::Value>& ar
         engineProps->Set(String::NewFromUtf8(isolate, "name"), String::NewFromUtf8(isolate, _engineName));
         engineProps->Set(String::NewFromUtf8(isolate, "version"), String::NewFromUtf8(isolate, _engineVersion));
     }
+}
+
+void UiModule::GetSupportedCefVersion(const v8::FunctionCallbackInfo<v8::Value>& args) {
+    auto ver = OsGetSupportedCefVersion();
+    auto isolate = Isolate::GetCurrent();
+    auto retVal = ver ? (Handle<Value>)String::NewFromUtf8(isolate, ver) : (Handle<Value>)Null(isolate);
+    if (ver) delete ver;
+    args.GetReturnValue().Set(retVal);
 }
 
 void UiModule::GetPerfStat(const FunctionCallbackInfo<Value>& args) {

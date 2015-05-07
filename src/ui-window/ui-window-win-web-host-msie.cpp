@@ -449,7 +449,7 @@ STDMETHODIMP IoUiSite::ShowMessage(HWND hwnd, LPOLESTR lpstrText, LPOLESTR lpstr
     WCHAR* title = new WCHAR[len + 1];
     int res = GetWindowText(hwnd, title, len + 1);
     *plResult = MessageBox(*_host->Window, lpstrText, title, dwType);
-    delete title;
+    delete[] title;
     return S_OK;
 }
 
@@ -548,7 +548,7 @@ void IoUiBrowserEventHandler::NavigateComplete() {
         WCHAR* jsonPolyfill = new WCHAR[len];
         MultiByteToWideChar(CP_ACP, 0, IE_JSON_POLYFILL_JS_CODE, -1, jsonPolyfill, len);
         _host->ExecScript(jsonPolyfill);
-        delete jsonPolyfill;
+        delete[] jsonPolyfill;
     }
 }
 
@@ -769,10 +769,12 @@ void UiWindowWebHostMsie::PostMessageToBrowser(LPCWSTR json, void* callback) {
     wcscat(script, L"):null)");
     LPWSTR ret;
     LPWSTR ex;
-    if (ExecScript(json, &ret, &ex)) {
+    if (ExecScript(script, &ret, &ex)) {
         Window->HandlePostMessageCallback(callback, ret, ex);
     }
-    delete script;
+    if (ret) delete[] ret;
+    if (ex) delete[] ex;
+    delete[] script;
 }
 
 bool UiWindowWebHostMsie::ExecScript(LPCWSTR code, LPWSTR* ret, LPWSTR* ex) {
@@ -824,8 +826,31 @@ bool UiWindowWebHostMsie::ExecScript(LPCWSTR code, LPWSTR* ret, LPWSTR* ex) {
     hr = script->Invoke(evalDispId, IID_NULL, LOCALE_USER_DEFAULT, DISPATCH_METHOD, &params, &retVar, &exInfo, NULL);
     SysFreeString(args[0].bstrVal);
     if (SUCCEEDED(hr)) {
-        if (ret) *ret = retVar.vt == VT_BSTR && retVar.bstrVal != NULL ? retVar.bstrVal : NULL;
-        if (ex) *ex = ret == NULL && exInfo.bstrDescription != NULL ? exInfo.bstrDescription : NULL;
+        if (hr == S_OK && retVar.vt == VT_BSTR && retVar.bstrVal != NULL) {
+            if (ret) {
+                *ret = new WCHAR[lstrlen(retVar.bstrVal) + 1];
+                lstrcpy(*ret, retVar.bstrVal);
+            }
+            VariantClear(&retVar);
+        } else if (ret) {
+            *ret = NULL;
+        }
+        if (hr == DISP_E_EXCEPTION) {
+            if (ex) {
+                if (exInfo.bstrDescription != NULL) {
+                    *ex = new WCHAR[lstrlen(exInfo.bstrDescription) + 1];
+                    lstrcpy(*ex, exInfo.bstrDescription);
+                }
+                if (exInfo.bstrDescription)
+                    SysFreeString(exInfo.bstrDescription);
+                if (exInfo.bstrSource)
+                    SysFreeString(exInfo.bstrSource);
+                if (exInfo.bstrHelpFile)
+                    SysFreeString(exInfo.bstrHelpFile);
+            }
+        } else if (ex) {
+            *ex = NULL;
+        }
     }
     script->Release();
     return SUCCEEDED(hr);

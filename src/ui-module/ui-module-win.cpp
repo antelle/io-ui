@@ -54,13 +54,21 @@ char* GetIeVersion() {
 
 char* GetCefVersion() {
     char* ver = new char[32];
-    itoa(cef_version_info(2/*CHROME_VERSION_MAJOR*/), ver, 10);
-    strcat(ver, ".");
-    itoa(cef_version_info(3/*CHROME_VERSION_MINOR*/), &ver[strlen(ver)], 10);
+    itoa(cef_version_info(0/*CEF_VERSION_MAJOR*/), ver, 10);
     strcat(ver, ".");
     itoa(cef_version_info(4/*CHROME_VERSION_BUILD*/), &ver[strlen(ver)], 10);
     strcat(ver, ".");
-    itoa(cef_version_info(5/*CHROME_VERSION_PATCH*/), &ver[strlen(ver)], 10);
+    itoa(cef_version_info(1/*CEF_REVISION*/), &ver[strlen(ver)], 10);
+    return ver;
+}
+
+char* UiModule::OsGetSupportedCefVersion() {
+    char* ver = new char[32];
+    itoa(CEF_VERSION_MAJOR, ver, 10);
+    strcat(ver, ".");
+    itoa(CHROME_VERSION_BUILD, &ver[strlen(ver)], 10);
+    strcat(ver, ".");
+    itoa(CEF_REVISION, &ver[strlen(ver)], 10);
     return ver;
 }
 

@@ -139,6 +139,7 @@ bool IoUiCefHandler::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser, Cef
         lstrcpy(msgStr, args->GetString(0).c_str());
         auto callback = args->GetInt(1);
         _host->Window->PostMessageToBackend(msgStr, (void*)callback);
+        delete[] msgStr;
         return true;
     } else if (message->GetName() == "pmc") {
         auto args = message->GetArgumentList();
@@ -153,8 +154,8 @@ bool IoUiCefHandler::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser, Cef
             lstrcpy(error, args->GetString(2).c_str());
         }
         _host->Window->HandlePostMessageCallback((void*)callback, result, error);
-        if (result) delete result;
-        if (error) delete error;
+        if (result) delete[] result;
+        if (error) delete[] error;
         return true;
     }
     return false;
@@ -242,7 +243,7 @@ bool IoUiCefApp::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser, CefProc
         CefRefPtr<CefV8Value> ret;
         CefRefPtr<CefV8Exception> ex;
         bool success = ctx->Eval(script, ret, ex);
-        delete script;
+        delete[] script;
         auto msg = CefProcessMessage::Create("pmc");
         args = msg->GetArgumentList();
         args->SetInt(0, callback);
@@ -269,7 +270,7 @@ bool IoUiCefApp::OnProcessMessageReceived(CefRefPtr<CefBrowser> browser, CefProc
         CefRefPtr<CefV8Value> ret;
         CefRefPtr<CefV8Exception> ex;
         browser->GetMainFrame()->GetV8Context()->Eval(script, ret, ex);
-        delete script;
+        delete[] script;
         return true;
     }
     return false;

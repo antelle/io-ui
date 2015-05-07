@@ -36,5 +36,6 @@ enum MENU_TYPE : int {
 
 enum ALERT_TYPE : int {
     ALERT_INFO = 0,
-    ALERT_ERROR = 1
+    ALERT_ERROR = 1,
+    ALERT_QUESTION = 2
 };
