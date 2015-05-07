@@ -80,10 +80,6 @@ void UiModule::Init(Handle<Object> exports) {
     NODE_SET_METHOD(exports, "updateEngineVersion", UiModule::UpdateEngineVersion);
     NODE_SET_METHOD(exports, "getSupportedCefVersion", UiModule::GetSupportedCefVersion);
     NODE_SET_METHOD(exports, "getPerfStat", UiModule::GetPerfStat);
-    NODE_SET_METHOD(exports, "alert", UiModule::Alert);
-    exports->Set(String::NewFromUtf8(isolate, "ALERT_ERROR"), Int32::New(isolate, ALERT_TYPE::ALERT_ERROR));
-    exports->Set(String::NewFromUtf8(isolate, "ALERT_INFO"), Int32::New(isolate, ALERT_TYPE::ALERT_INFO));
-    exports->Set(String::NewFromUtf8(isolate, "ALERT_QUESTION"), Int32::New(isolate, ALERT_TYPE::ALERT_QUESTION));
     exports->Set(String::NewFromUtf8(isolate, "version"), String::NewFromUtf8(isolate, UI_MODULE_VERSION));
     uv_mutex_lock(&_initMutex);
     if (UI_FAILED(_initCode)) {
@@ -127,19 +123,4 @@ void UiModule::GetPerfStat(const FunctionCallbackInfo<Value>& args) {
         arr->Set(i, Integer::New(isolate, time));
     }
     args.GetReturnValue().Set(arr);
-}
-
-void UiModule::Alert(const FunctionCallbackInfo<Value>& args) {
-    Isolate* isolate = Isolate::GetCurrent();
-    HandleScope scope(isolate);
-    if (args.Length() == 0) {
-        return;
-    }
-    Utf8String* msg = new Utf8String(args[0]);
-    ALERT_TYPE type = ALERT_TYPE::ALERT_INFO;
-    if (args.Length() > 1) {
-        type = (ALERT_TYPE)args[1]->Int32Value();
-    }
-    int ret = UiWindow::Alert(msg, type);
-    args.GetReturnValue().Set(ret);
 }

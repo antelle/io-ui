@@ -13,7 +13,6 @@ public:
 private:
     static void UpdateEngineVersion(const v8::FunctionCallbackInfo<v8::Value>& args);
     static void GetPerfStat(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void Alert(const v8::FunctionCallbackInfo<v8::Value>& args);
     static void GetSupportedCefVersion(const v8::FunctionCallbackInfo<v8::Value>& args);
 
     static v8::Persistent<v8::Object> EnginePropsPersistent;

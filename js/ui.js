@@ -290,7 +290,7 @@
             var url = config.cef && config.cef.hasOwnProperty('url') ? config.cef.url : DEFAULT_CEF_URL;
             var ver = ui.getSupportedCefVersion();
             if (url && ver && ui.engine.name !== 'cef') {
-                if (ui.alert('Additional component is required to run this app. Do you want to download it (~30 MB)?', ui.ALERT_QUESTION)) {
+                if (ui.Window.alert('Additional component is required to run this app. Do you want to download it (~30 MB)?', ui.Window.ALERT_QUESTION)) {
                     url = url.replace('{platform}', process.platform).replace('{arch}', process.arch).replace('{ver}', ver);
                     downloadAndExtract(url, function() {
                         ui.updateEngineVersion();
@@ -317,7 +317,7 @@
             }
             // ui.showProgressDialog();
             var h = url.lastIndexOf('https', 0) === 0 ? require('https') : http;
-            var request = h.get(url, function(response) {
+            h.get(url, function(response) {
                 var contentLength = response.headers['content-length'],
                     downloadedLength = 0;
                 if (response.statusCode !== 200) {
@@ -373,7 +373,7 @@
         function errorExit(msg, err) {
             // ui.hideProgressDialog();
             console.error(msg, err);
-            ui.alert(msg, ui.ALERT_ERROR);
+            ui.Window.alert(msg, ui.Window.ALERT_ERROR);
             process.exit(2);
         }
     };

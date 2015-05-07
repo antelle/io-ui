@@ -53,15 +53,23 @@ struct WindowOpenFileParams {
     bool Dirs = false;
     Utf8String** Ext = NULL;
     bool Multiple = false;
-    v8::Persistent<v8::Function>* Complete;
+    v8::Persistent<v8::Function> Complete;
     
     ~WindowOpenFileParams() {
         if (Title)
             delete Title;
-        if (Complete) {
-            Complete->Reset();
-            delete Complete;
-        }
+        Complete.Reset();
+    }
+};
+
+struct ProgressDlgConfig {
+    Utf8String* Title = NULL;
+    v8::Persistent<v8::Function> Closed;
+
+    ~ProgressDlgConfig() {
+        if (Title)
+            delete Title;
+        Closed.Reset();
     }
 };
 
@@ -71,8 +79,9 @@ public:
     static UI_RESULT Initialize();
     static int Main(int argc, char* argv[]);
     virtual ~UiWindow();
-    static int Alert(Utf8String* msg, ALERT_TYPE type);
     bool ShouldClose();
+    static int Alert(Utf8String* msg, ALERT_TYPE type);
+    static void ShowProgressDlg(ProgressDlgConfig* config);
 
 protected:
     UiWindow();
@@ -143,6 +152,9 @@ private:
     static void SetTopmost(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
     static void GetOpacity(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
     static void SetOpacity(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
+
+    static void Alert(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void ShowProgressDlg(const v8::FunctionCallbackInfo<v8::Value>& args);
 
     static void AsyncCallback(uv_async_t *handle);
     void InvokeEventCallback(v8::Isolate* isolate, WindowEventData* data);

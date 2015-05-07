@@ -32,6 +32,9 @@ void UiWindow::Init(Handle<Object> exports) {
     tpl->SetClassName(String::NewFromUtf8(isolate, "UiWindow"));
     tpl->InstanceTemplate()->SetInternalFieldCount(3);
 
+    NODE_SET_METHOD(tpl, "alert", Alert);
+    NODE_SET_METHOD(tpl, "showProgressDlg", ShowProgressDlg);
+
     NODE_SET_PROTOTYPE_METHOD(tpl, "show", Show);
     NODE_SET_PROTOTYPE_METHOD(tpl, "close", Close);
     NODE_SET_PROTOTYPE_METHOD(tpl, "move", Move);
@@ -61,6 +64,10 @@ void UiWindow::Init(Handle<Object> exports) {
 
     tpl->Set(isolate, "MENU_TYPE_SIMPLE", Int32::New(isolate, MENU_TYPE::MENU_TYPE_SIMPLE));
     tpl->Set(isolate, "MENU_TYPE_SEPARATOR", Int32::New(isolate, MENU_TYPE::MENU_TYPE_SEPARATOR));
+
+    tpl->Set(String::NewFromUtf8(isolate, "ALERT_ERROR"), Int32::New(isolate, ALERT_TYPE::ALERT_ERROR));
+    tpl->Set(String::NewFromUtf8(isolate, "ALERT_INFO"), Int32::New(isolate, ALERT_TYPE::ALERT_INFO));
+    tpl->Set(String::NewFromUtf8(isolate, "ALERT_QUESTION"), Int32::New(isolate, ALERT_TYPE::ALERT_QUESTION));
 
     constructor.Reset(isolate, tpl->GetFunction());
     exports->Set(String::NewFromUtf8(isolate, "Window"), tpl->GetFunction());
@@ -295,8 +302,8 @@ void UiWindow::InvokeEventCallback(Isolate* isolate, WindowEventData* data) {
         } else {
             callbackResult = (Handle<Value>)Null(isolate);
         }
-        if (params->Complete) {
-            auto callbackFn = Local<Function>::New(isolate, *params->Complete);
+        if (!params->Complete.IsEmpty()) {
+            auto callbackFn = Local<Function>::New(isolate, params->Complete);
             Handle<Value> argv[] = { callbackResult };
             callbackFn->Call(hndl, 1, argv);
         }
@@ -359,7 +366,7 @@ void UiWindow::SelectFile(const FunctionCallbackInfo<Value>& args) {
         }
         if (config->Get(String::NewFromUtf8(isolate, "complete"))->IsFunction()) {
             auto fn = Local<Function>::Cast(config->Get(String::NewFromUtf8(isolate, "complete")));
-            params->Complete = new Persistent<Function>(isolate, fn);
+            params->Complete.Reset(isolate, fn);
         }
     }
     if (!params->Title)
@@ -583,4 +590,34 @@ void UiWindow::SetOpacity(Local<String> property, Local<Value> value, const Prop
         opacity = 1;
     }
     _this->SetOpacity(opacity);
+}
+
+void UiWindow::Alert(const FunctionCallbackInfo<Value>& args) {
+    Isolate* isolate = Isolate::GetCurrent();
+    HandleScope scope(isolate);
+    if (args.Length() == 0) {
+        return;
+    }
+    Utf8String* msg = new Utf8String(args[0]);
+    ALERT_TYPE type = ALERT_TYPE::ALERT_INFO;
+    if (args.Length() > 1) {
+        type = (ALERT_TYPE)args[1]->Int32Value();
+    }
+    int ret = Alert(msg, type);
+    args.GetReturnValue().Set(ret);
+}
+
+void UiWindow::ShowProgressDlg(const FunctionCallbackInfo<Value>& args) {
+    Isolate* isolate = Isolate::GetCurrent();
+    HandleScope scope(isolate);
+    if (args.Length() == 0) {
+        return;
+    }
+    auto config = new ProgressDlgConfig();
+    auto configObj = Handle<Object>::Cast(args[0]);
+    config->Title = new Utf8String(configObj->Get(String::NewFromUtf8(isolate, "title")));
+    config->Closed.Reset(isolate, Local<Function>::Cast(configObj->Get(String::NewFromUtf8(isolate, "closed"))));
+    //ShowProgressDlg(config);
+    auto ret = Object::New(isolate);
+    args.GetReturnValue().Set(ret);
 }
