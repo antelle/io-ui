@@ -2,6 +2,7 @@
 #include "../perf-trace/perf-trace.h"
 #include "../ui-module/ui-module.h"
 #include "ui-window-win-web-host.h"
+#include "ui-window-util-win.h"
 #include <Windows.h>
 #include <Shlobj.h>
 #include <include/cef_app.h>
@@ -9,12 +10,11 @@
 #include <iomanip>
 
 #define WM_USER_CREATE_WINDOW (WM_APP + 1)
-#define WM_USER_NAVIGATE (WM_APP + 2)
-#define WM_USER_POST_MSG (WM_APP + 3)
-#define WM_USER_POST_MSG_CB (WM_APP + 4)
-#define WM_USER_SELECT_FILE (WM_APP + 5)
-
-#define BASE_DPI 96
+#define WM_USER_SHOW_PROGRESS_DLG (WM_APP + 2)
+#define WM_USER_NAVIGATE (WM_APP + 3)
+#define WM_USER_POST_MSG (WM_APP + 4)
+#define WM_USER_POST_MSG_CB (WM_APP + 5)
+#define WM_USER_SELECT_FILE (WM_APP + 6)
 
 struct MsgCallbackParam {
     void* Callback;
@@ -53,7 +53,6 @@ public:
     HWND hwnd;
     static WCHAR _wndClassName[];
     static DWORD _mainThreadId;
-    static int _dpi;
     static bool _isCef;
 
     BOOL HandleMessage(UINT, WPARAM, LPARAM);
@@ -94,23 +93,30 @@ private:
 
 WCHAR UiWindowWin::_wndClassName[] = L"IoUiWnd";
 DWORD UiWindowWin::_mainThreadId = 0;
-int UiWindowWin::_dpi = BASE_DPI;
 bool UiWindowWin::_isCef = false;
 
 int UiWindow::Main(int argc, char* argv[]) {
     MSG msg;
     while (GetMessage(&msg, 0, 0, 0)) {
         //std::cerr << "MSG " << std::hex << std::setw(8) << msg.message << std::setw(12) << msg.lParam << std::setw(12) << msg.wParam << std::setw(12) << msg.hwnd << std::endl;
-        if (msg.message == WM_USER_CREATE_WINDOW) {
+        if (msg.message == WM_USER_CREATE_WINDOW && msg.wParam) {
             UiWindowWin* window = (UiWindowWin*)msg.wParam;
             window->ShowOsWindow();
             continue;
         }
+        if (msg.message == WM_USER_SHOW_PROGRESS_DLG && msg.wParam) {
+            ProgressDialog* dlg = (ProgressDialog*)msg.wParam;
+            dlg->ShowOsWindow();
+            continue;
+        }
         if (msg.message >= WM_KEYFIRST && msg.message <= WM_KEYLAST || msg.message >= WM_MOUSEFIRST && msg.message <= WM_MOUSELAST) {
             HWND rootHwnd = GetAncestor(msg.hwnd, GA_ROOT);
-            UiWindowWin* _this = (UiWindowWin*)GetWindowLong(rootHwnd, GWL_USERDATA);
-            if (_this && _this->HandleAccelerator(&msg))
-                continue;
+            WCHAR cls[16];
+            if (GetClassName(rootHwnd, cls, sizeof(cls) / sizeof(WCHAR)) && !lstrcmp(cls, UiWindowWin::_wndClassName)) {
+                UiWindowWin* _this = (UiWindowWin*)GetWindowLongPtr(rootHwnd, GWL_USERDATA);
+                if (_this && _this->HandleAccelerator(&msg))
+                    continue;
+            }
         }
         TranslateMessage(&msg);
         DispatchMessage(&msg);
@@ -151,11 +157,6 @@ UI_RESULT UiWindow::OsInitialize() {
     };
     RegisterClassEx(&wc);
     UiWindowWin::_mainThreadId = GetCurrentThreadId();
-
-    HDC hdc = GetDC(NULL);
-    if (hdc) {
-        UiWindowWin::_dpi = GetDeviceCaps(hdc, LOGPIXELSX);
-    }
     return UI_S_OK;
 }
 
@@ -172,14 +173,18 @@ int UiWindow::Alert(Utf8String* msg, ALERT_TYPE type) {
     return ((type == ALERT_TYPE::ALERT_QUESTION) && (result == IDYES));
 }
 
+void UiWindow::ShowProgressDlg(ProgressDialog* dlg) {
+    PostThreadMessage(UiWindowWin::_mainThreadId, WM_USER_SHOW_PROGRESS_DLG, (WPARAM)dlg, 0);
+}
+
 LRESULT CALLBACK UiWindowWin::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     UiWindowWin* _this;
     if (uMsg == WM_CREATE && (_this = (UiWindowWin*)(LPCREATESTRUCT(lParam))->lpCreateParams)) {
-        SetWindowLong(hwnd, GWL_USERDATA, (long)_this);
+        SetWindowLongPtr(hwnd, GWL_USERDATA, (long)_this);
         _this->hwnd = hwnd;
     }
     else {
-        _this = (UiWindowWin*)GetWindowLong(hwnd, GWL_USERDATA);
+        _this = (UiWindowWin*)GetWindowLongPtr(hwnd, GWL_USERDATA);
     }
 
     BOOL fDoDef = !(_this && _this->HandleMessage(uMsg, wParam, lParam));
@@ -192,7 +197,7 @@ BOOL UiWindowWin::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) {
     case WM_DESTROY:
         _webHost->Destroy();
         _webHost = NULL;
-        SetWindowLong(hwnd, GWL_USERDATA, (long)NULL);
+        SetWindowLongPtr(hwnd, GWL_USERDATA, (long)NULL);
         EmitEvent(new WindowEventData(WINDOW_EVENT_CLOSED));
         if (_isMainWindow)
             PostQuitMessage(0);
@@ -398,8 +403,8 @@ void UiWindowWin::ShowOsWindow() {
     CreateWindowMenu();
     hwnd = CreateWindowEx(0, _wndClassName, *_config->Title,
         style,
-        this->_rect.Left * _dpi / BASE_DPI, this->_rect.Top * _dpi / BASE_DPI,
-        this->_rect.Width * _dpi / BASE_DPI, this->_rect.Height * _dpi / BASE_DPI,
+        this->_rect.Left * UiWindowUtilWin::GetDpi() / BASE_DPI, this->_rect.Top * UiWindowUtilWin::GetDpi() / BASE_DPI,
+        this->_rect.Width * UiWindowUtilWin::GetDpi() / BASE_DPI, this->_rect.Height * UiWindowUtilWin::GetDpi() / BASE_DPI,
         parentHwnd, _hmenu, hinst, this);
     if (_parent)
         EnableWindow(parentHwnd, FALSE);
@@ -593,21 +598,21 @@ LPCSTR UiWindowWin::GetEngineVersion() {
 WindowRect UiWindowWin::GetWindowRect() {
     RECT rect;
     ::GetWindowRect(hwnd, &rect);
-    return WindowRect(rect.left * BASE_DPI / _dpi, rect.top * BASE_DPI / _dpi,
-        (rect.right - rect.left) * BASE_DPI / _dpi, (rect.bottom - rect.top) * BASE_DPI / _dpi);
+    return WindowRect(rect.left * BASE_DPI / UiWindowUtilWin::GetDpi(), rect.top * BASE_DPI / UiWindowUtilWin::GetDpi(),
+        (rect.right - rect.left) * BASE_DPI / UiWindowUtilWin::GetDpi(), (rect.bottom - rect.top) * BASE_DPI / UiWindowUtilWin::GetDpi());
 }
 
 WindowRect UiWindowWin::GetScreenRect() {
     RECT rect;
     HWND hDesktop = GetDesktopWindow();
     ::GetWindowRect(hDesktop, &rect);
-    return WindowRect(rect.left * BASE_DPI / _dpi, rect.top * BASE_DPI / _dpi,
-        (rect.right - rect.left) * BASE_DPI / _dpi, (rect.bottom - rect.top) * BASE_DPI / _dpi);
+    return WindowRect(rect.left * BASE_DPI / UiWindowUtilWin::GetDpi(), rect.top * BASE_DPI / UiWindowUtilWin::GetDpi(),
+        (rect.right - rect.left) * BASE_DPI / UiWindowUtilWin::GetDpi(), (rect.bottom - rect.top) * BASE_DPI / UiWindowUtilWin::GetDpi());
 }
 
 void UiWindowWin::SetWindowRect(WindowRect& rect) {
-    MoveWindow(hwnd, rect.Left * _dpi / BASE_DPI, rect.Top * _dpi / BASE_DPI,
-        rect.Width * _dpi / BASE_DPI, rect.Height * _dpi / BASE_DPI, true);
+    MoveWindow(hwnd, rect.Left * UiWindowUtilWin::GetDpi() / BASE_DPI, rect.Top * UiWindowUtilWin::GetDpi() / BASE_DPI,
+        rect.Width * UiWindowUtilWin::GetDpi() / BASE_DPI, rect.Height * UiWindowUtilWin::GetDpi() / BASE_DPI, true);
 }
 
 Utf8String* UiWindowWin::GetTitle() {

@@ -153,6 +153,9 @@ int UiWindow::Alert(Utf8String* msg, ALERT_TYPE type) {
     return result;
 }
 
+void UiWindow::ShowProgressDlg(ProgressDialog* dlg) {
+}
+
 void UiWindowLinux::ShowOsWindow() {
     _window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     if (_parent) {

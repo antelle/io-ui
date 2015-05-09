@@ -316,6 +316,9 @@ int UiWindow::Alert(Utf8String* msg, ALERT_TYPE type) {
     return result;
 }
 
+void UiWindow::ShowProgressDlg(ProgressDialog* dlg) {
+}
+
 UiWindow* UiWindow::CreateUiWindow() {
     return new UiWindowMac();
 }

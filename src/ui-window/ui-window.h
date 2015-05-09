@@ -7,6 +7,7 @@
 #include "../utf8-string.h"
 #include "../window-config.h"
 #include "../const.h"
+#include "progress-dialog.h"
 
 enum WINDOW_EVENT : int {
     WINDOW_EVENT_READY = 1,
@@ -62,17 +63,6 @@ struct WindowOpenFileParams {
     }
 };
 
-struct ProgressDlgConfig {
-    Utf8String* Title = NULL;
-    v8::Persistent<v8::Function> Closed;
-
-    ~ProgressDlgConfig() {
-        if (Title)
-            delete Title;
-        Closed.Reset();
-    }
-};
-
 class UiWindow : public node::ObjectWrap {
 public:
     static void Init(v8::Handle<v8::Object> exports);
@@ -81,7 +71,7 @@ public:
     virtual ~UiWindow();
     bool ShouldClose();
     static int Alert(Utf8String* msg, ALERT_TYPE type);
-    static void ShowProgressDlg(ProgressDlgConfig* config);
+    static void ShowProgressDlg(ProgressDialog* dlg);
 
 protected:
     UiWindow();
@@ -121,7 +111,7 @@ protected:
 
 private:
 
-    static v8::Persistent<v8::Function> constructor;
+    static v8::Persistent<v8::Function> _constructor;
 
     static void New(const v8::FunctionCallbackInfo<v8::Value>& args);
     static void Show(const v8::FunctionCallbackInfo<v8::Value>& args);

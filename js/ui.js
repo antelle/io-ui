@@ -204,6 +204,8 @@
         var serverConfig = util._extend({}, config.server);
         this.server = ui.Server.createDefault(serverConfig);
 
+        var downloadProgressDlg = null;
+
         this.run = function () {
             var engineReadyPromise = new Promise(function(resolve) {
                 if (checkVersion(false)) {
@@ -290,16 +292,12 @@
             var url = config.cef && config.cef.hasOwnProperty('url') ? config.cef.url : DEFAULT_CEF_URL;
             var ver = ui.getSupportedCefVersion();
             if (url && ver && ui.engine.name !== 'cef') {
-                if (ui.Window.alert('Additional component is required to run this app. Do you want to download it (~30 MB)?', ui.Window.ALERT_QUESTION)) {
-                    url = url.replace('{platform}', process.platform).replace('{arch}', process.arch).replace('{ver}', ver);
-                    downloadAndExtract(url, function() {
-                        ui.updateEngineVersion();
-                        checkVersion(true);
-                        success();
-                    });
-                } else {
-                    process.exit(3);
-                }
+                url = url.replace('{platform}', process.platform).replace('{arch}', process.arch).replace('{ver}', ver);
+                downloadAndExtract(url, function() {
+                    ui.updateEngineVersion();
+                    checkVersion(true);
+                    success();
+                });
             } else {
                 checkVersion(true);
             }
@@ -315,37 +313,59 @@
                 errorExit('Cannot download necessary app component: access to file is denied. Please, run this app as Administrator first time', err);
                 return;
             }
-            // ui.showProgressDialog();
-            var h = url.lastIndexOf('https', 0) === 0 ? require('https') : http;
-            h.get(url, function(response) {
-                var contentLength = response.headers['content-length'],
-                    downloadedLength = 0;
-                if (response.statusCode !== 200) {
-                    tmpFile.close();
-                    fs.unlink(tmpFilePath);
-                    errorExit('Error downloading app component: supporting file for your app version was not found', 'response status code ' + response.statusCode);
-                    return;
+            downloadProgressDlg = ui.Window.showProgressDlg({
+                title: 'Downloading...',
+                text: 'Downloading necessary app components...',
+                value: -1,
+                closed: function() {
+                    if (downloadProgressDlg) {
+                        console.error('Download cancelled');
+                        tmpFile.close();
+                        tryDeleteFile(tmpFilePath);
+                        process.exit(20);
+                    }
                 }
-                response.pipe(tmpFile);
-                tmpFile.on('finish', function() {
-                    tmpFile.close(function() {
-                        extractFile(tmpFilePath, path.dirname(process.execPath), success);
-                    });
-                });
-                if (contentLength) {
-                    response.on('data', function (chunk) {
-                        downloadedLength += chunk.length;
-                        console.log('Downloaded: ' + (downloadedLength / contentLength));
-                        //ui.setProgress(downloadedLength / contentLength);
-                    });
-                } else {
-                    //ui.setProgress(null);
-                }
-            }).on('error', function(err) {
-                tmpFile.close();
-                fs.unlink(tmpFilePath);
-                errorExit('Network error while downloading app component', err);
             });
+            loadRequest(url);
+
+            function loadRequest(url) {
+                var h = url.lastIndexOf('https', 0) === 0 ? require('https') : http;
+                h.get(url, function(response) {
+                    if ([301, 302].indexOf(response.statusCode >= 0) && response.headers.location) {
+                        return loadRequest(response.headers.location);
+                    }
+                    var contentLength = response.headers['content-length'],
+                        downloadedLength = 0;
+                    if (response.statusCode !== 200) {
+                        tmpFile.close();
+                        tryDeleteFile(tmpFilePath);
+                        errorExit('Error downloading app component: supporting file for your app version was not found', 'response status code ' + response.statusCode);
+                        return;
+                    }
+                    response.pipe(tmpFile);
+                    tmpFile.on('finish', function() {
+                        tmpFile.close(function() {
+                            downloadProgressDlg.setValue(-1, 'Extracting downloaded app components...');
+                            extractFile(tmpFilePath, path.dirname(process.execPath), success);
+                        });
+                    });
+                    if (contentLength) {
+                        var lastProgress = -1;
+                        response.on('data', function (chunk) {
+                            downloadedLength += chunk.length;
+                            var progress = Math.round(downloadedLength / contentLength * 100);
+                            if (progress !== lastProgress) {
+                                downloadProgressDlg.setValue(progress);
+                                lastProgress = progress;
+                            }
+                        });
+                    }
+                }).on('error', function(err) {
+                    tmpFile.close();
+                    tryDeleteFile(tmpFilePath);
+                    errorExit('Network error while downloading app component', err);
+                });
+            }
         }
 
         function extractFile(file, folder, success) {
@@ -354,27 +374,42 @@
             var zip = new StreamZip({ file: file });
             zip.on('error', function(err) {
                 zip.close();
-                fs.unlink(file);
+                tryDeleteFile(file);
                 errorExit(errMsg, err);
             });
             zip.on('ready', function() {
                 zip.extract(null, folder, function(err) {
                     zip.close();
-                    fs.unlink(file);
+                    tryDeleteFile(file);
                     if (err) {
                         errorExit(errMsg, err);
                     } else {
+                        hideProgressDlg();
                         success();
                     }
                 });
             });
         }
 
+        function tryDeleteFile(filePath) {
+            try {
+                fs.unlinkSync(filePath);
+            } catch (e) {}
+        }
+
         function errorExit(msg, err) {
-            // ui.hideProgressDialog();
+            hideProgressDlg();
             console.error(msg, err);
             ui.Window.alert(msg, ui.Window.ALERT_ERROR);
             process.exit(2);
+        }
+
+        function hideProgressDlg() {
+            if (downloadProgressDlg) {
+                var dlg = downloadProgressDlg;
+                downloadProgressDlg = null;
+                dlg.close();
+            }
         }
     };
 

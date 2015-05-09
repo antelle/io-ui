@@ -32,7 +32,7 @@ index 8886b74..118683b 100644
        }],
        [ 'OS in "linux freebsd openbsd solaris"', {
 diff --git a/node.gyp b/node.gyp
-index f60b294..eaae77d 100644
+index f60b294..9d4e522 100644
 --- a/node.gyp
 +++ b/node.gyp
 @@ -16,7 +16,7 @@
@@ -67,7 +67,7 @@ index f60b294..eaae77d 100644
          'src/node_os.cc',
          'src/node_v8.cc',
          'src/node_stat_watcher.cc',
-@@ -157,6 +162,19 @@
+@@ -157,6 +162,20 @@
          '<@(library_files)',
          # node.gyp is added to the project by default.
          'common.gypi',
@@ -84,10 +84,11 @@ index f60b294..eaae77d 100644
 +        '../../src/ui-module/ui-module.h',
 +        '../../src/ui-window/ui-window.cpp',
 +        '../../src/ui-window/ui-window.h',
++        '../../src/ui-window/progress-dialog.cpp',
        ],
  
        'defines': [
-@@ -164,7 +182,7 @@
+@@ -164,7 +183,7 @@
          'ARCH="<(target_arch)"',
          'PLATFORM="<(OS)"',
          'NODE_TAG="<(node_tag)"',
@@ -96,7 +97,7 @@ index f60b294..eaae77d 100644
        ],
  
        'conditions': [
-@@ -327,21 +345,42 @@
+@@ -327,21 +346,44 @@
          [ 'OS=="win"', {
            'sources': [
              'src/res/node.rc',
@@ -104,8 +105,10 @@ index f60b294..eaae77d 100644
 +            '../../src/perf-trace/perf-trace-win.cpp',
 +            '../../src/ui-module/ui-module-win.cpp',
 +            '../../src/ui-window/ui-window-win.cpp',
++            '../../src/ui-window/ui-window-util-win.cpp',
 +            '../../src/ui-window/ui-window-win-web-host-msie.cpp',
 +            '../../src/ui-window/ui-window-win-web-host-cef.cpp',
++            '../../src/ui-window/progress-dialog-win.cpp',
 +          ],
 +          'include_dirs': [
 +            '../cef'
@@ -141,7 +144,7 @@ index f60b294..eaae77d 100644
            'defines!': [
              'PLATFORM="mac"',
            ],
-@@ -349,6 +388,20 @@
+@@ -349,6 +391,21 @@
              # we need to use node's preferred "darwin" rather than gyp's preferred "mac"
              'PLATFORM="darwin"',
            ],
@@ -149,7 +152,8 @@ index f60b294..eaae77d 100644
 +            '../../src/os-main/os-main-mac.mm',
 +            '../../src/perf-trace/perf-trace-mac.mm',
 +            '../../src/ui-module/ui-module-mac.mm',
-+            '../../src/ui-window/ui-window-mac.mm'
++            '../../src/ui-window/ui-window-mac.mm',
++            '../../src/ui-window/progress-dialog-mac.mm',
 +          ],
 +          'cflags': [ '-m32' ],
 +          'ldflags': [ '-m32' ],
@@ -162,7 +166,7 @@ index f60b294..eaae77d 100644
          }],
          [ 'OS=="freebsd"', {
            'libraries': [
-@@ -370,6 +423,42 @@
+@@ -370,6 +427,43 @@
              'PLATFORM="sunos"',
            ],
          }],
@@ -172,6 +176,7 @@ index f60b294..eaae77d 100644
 +            '../../src/perf-trace/perf-trace-linux.cpp',
 +            '../../src/ui-module/ui-module-linux.cpp',
 +            '../../src/ui-window/ui-window-linux.cpp',
++            '../../src/ui-window/progress-dialog-linux.cpp',
 +          ],
 +          'cflags': [
 +            '-std=c++11',
@@ -205,7 +210,7 @@ index f60b294..eaae77d 100644
          [
            'OS in "linux freebsd" and node_shared_v8=="false"', {
              'ldflags': [
-@@ -379,13 +468,23 @@
+@@ -379,13 +473,23 @@
        ],
        'msvs_settings': {
          'VCLinkerTool': {

@@ -1,11 +1,12 @@
 #include <node.h>
 #include <iostream>
 #include "ui-window.h"
+#include "progress-dialog.h"
 #include "../perf-trace/perf-trace.h"
 
 using namespace v8;
 
-Persistent<Function> UiWindow::constructor;
+Persistent<Function> UiWindow::_constructor;
 bool UiWindow::_isFirstWindowCreated = false;
 uv_async_t UiWindow::_uvAsyncHandle;
 uv_mutex_t UiWindow::_pendingEventsLock;
@@ -69,7 +70,7 @@ void UiWindow::Init(Handle<Object> exports) {
     tpl->Set(String::NewFromUtf8(isolate, "ALERT_INFO"), Int32::New(isolate, ALERT_TYPE::ALERT_INFO));
     tpl->Set(String::NewFromUtf8(isolate, "ALERT_QUESTION"), Int32::New(isolate, ALERT_TYPE::ALERT_QUESTION));
 
-    constructor.Reset(isolate, tpl->GetFunction());
+    _constructor.Reset(isolate, tpl->GetFunction());
     exports->Set(String::NewFromUtf8(isolate, "Window"), tpl->GetFunction());
 }
 
@@ -613,11 +614,6 @@ void UiWindow::ShowProgressDlg(const FunctionCallbackInfo<Value>& args) {
     if (args.Length() == 0) {
         return;
     }
-    auto config = new ProgressDlgConfig();
-    auto configObj = Handle<Object>::Cast(args[0]);
-    config->Title = new Utf8String(configObj->Get(String::NewFromUtf8(isolate, "title")));
-    config->Closed.Reset(isolate, Local<Function>::Cast(configObj->Get(String::NewFromUtf8(isolate, "closed"))));
-    //ShowProgressDlg(config);
-    auto ret = Object::New(isolate);
-    args.GetReturnValue().Set(ret);
+    auto dlg = ProgressDialog::CreateNew(args);
+    ShowProgressDlg(dlg);
 }
