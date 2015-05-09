@@ -1,0 +1,115 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="ui-window">
+      <UniqueIdentifier>{f53759e0-8289-4dd7-9e6c-644b40e8ad03}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ui-module">
+      <UniqueIdentifier>{99f9531e-6412-490c-9197-f5e48f6b76fe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="os-main">
+      <UniqueIdentifier>{bb3819a1-e728-43d4-8eae-323f017d3229}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="perf-trace">
+      <UniqueIdentifier>{9e8f2a03-aa7f-445c-a624-400d114e4dc5}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\const.h" />
+    <ClInclude Include="..\..\src\utf8-string.h" />
+    <ClInclude Include="..\..\src\window-config.h" />
+    <ClInclude Include="..\..\src\ui-window\ui-window.h">
+      <Filter>ui-window</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\ui-module\ui-module.h">
+      <Filter>ui-module</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\perf-trace\perf-trace.h">
+      <Filter>perf-trace</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\ui-window\ie-json-polyfill.h">
+      <Filter>ui-window</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\ui-window\ui-window-win-web-host.h">
+      <Filter>ui-window</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\ui-window\progress-dialog.h">
+      <Filter>ui-window</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\ui-window\ui-window-util-win.h">
+      <Filter>ui-window</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\utf8-string.cpp" />
+    <ClCompile Include="..\..\src\window-config.cpp" />
+    <ClCompile Include="..\..\src\ui-window\ui-window.cpp">
+      <Filter>ui-window</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ui-window\ui-window-linux.cpp">
+      <Filter>ui-window</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ui-window\ui-window-win.cpp">
+      <Filter>ui-window</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ui-module\ui-module.cpp">
+      <Filter>ui-module</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ui-module\ui-module-linux.cpp">
+      <Filter>ui-module</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ui-module\ui-module-win.cpp">
+      <Filter>ui-module</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\os-main\os-main-linux.cpp">
+      <Filter>os-main</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\os-main\os-main-win.cpp">
+      <Filter>os-main</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\perf-trace\perf-trace.cpp">
+      <Filter>perf-trace</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\perf-trace\perf-trace-linux.cpp">
+      <Filter>perf-trace</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\perf-trace\perf-trace-mac.cpp">
+      <Filter>perf-trace</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\perf-trace\perf-trace-win.cpp">
+      <Filter>perf-trace</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ui-window\ui-window-win-web-host-msie.cpp">
+      <Filter>ui-window</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ui-window\ui-window-win-web-host-cef.cpp">
+      <Filter>ui-window</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ui-window\progress-dialog.cpp">
+      <Filter>ui-window</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ui-window\progress-dialog-win.cpp">
+      <Filter>ui-window</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ui-window\progress-dialog-linux.cpp">
+      <Filter>ui-window</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ui-window\ui-window-util-win.cpp">
+      <Filter>ui-window</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\src\ui-window\ui-window-mac.mm">
+      <Filter>ui-window</Filter>
+    </None>
+    <None Include="..\..\src\ui-module\ui-module-mac.mm">
+      <Filter>ui-module</Filter>
+    </None>
+    <None Include="..\..\src\os-main\os-main-mac.mm">
+      <Filter>os-main</Filter>
+    </None>
+    <None Include="..\..\src\ui-window\progress-dialog-mac.mm">
+      <Filter>ui-window</Filter>
+    </None>
+  </ItemGroup>
+</Project>

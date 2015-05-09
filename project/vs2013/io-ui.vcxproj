@@ -1,0 +1,113 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\const.h" />
+    <ClInclude Include="..\..\src\perf-trace\perf-trace.h" />
+    <ClInclude Include="..\..\src\ui-module\ui-module.h" />
+    <ClInclude Include="..\..\src\ui-window\ie-json-polyfill.h" />
+    <ClInclude Include="..\..\src\ui-window\progress-dialog.h" />
+    <ClInclude Include="..\..\src\ui-window\ui-window-util-win.h" />
+    <ClInclude Include="..\..\src\ui-window\ui-window-win-web-host.h" />
+    <ClInclude Include="..\..\src\ui-window\ui-window.h" />
+    <ClInclude Include="..\..\src\utf8-string.h" />
+    <ClInclude Include="..\..\src\window-config.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\os-main\os-main-linux.cpp" />
+    <ClCompile Include="..\..\src\os-main\os-main-win.cpp" />
+    <ClCompile Include="..\..\src\perf-trace\perf-trace-linux.cpp" />
+    <ClCompile Include="..\..\src\perf-trace\perf-trace-mac.cpp" />
+    <ClCompile Include="..\..\src\perf-trace\perf-trace-win.cpp" />
+    <ClCompile Include="..\..\src\perf-trace\perf-trace.cpp" />
+    <ClCompile Include="..\..\src\ui-module\ui-module-linux.cpp" />
+    <ClCompile Include="..\..\src\ui-module\ui-module-win.cpp" />
+    <ClCompile Include="..\..\src\ui-module\ui-module.cpp" />
+    <ClCompile Include="..\..\src\ui-window\progress-dialog-linux.cpp" />
+    <ClCompile Include="..\..\src\ui-window\progress-dialog-win.cpp" />
+    <ClCompile Include="..\..\src\ui-window\progress-dialog.cpp" />
+    <ClCompile Include="..\..\src\ui-window\ui-window-linux.cpp" />
+    <ClCompile Include="..\..\src\ui-window\ui-window-util-win.cpp" />
+    <ClCompile Include="..\..\src\ui-window\ui-window-win-web-host-cef.cpp" />
+    <ClCompile Include="..\..\src\ui-window\ui-window-win-web-host-msie.cpp" />
+    <ClCompile Include="..\..\src\ui-window\ui-window-win.cpp" />
+    <ClCompile Include="..\..\src\ui-window\ui-window.cpp" />
+    <ClCompile Include="..\..\src\utf8-string.cpp" />
+    <ClCompile Include="..\..\src\window-config.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\src\os-main\os-main-mac.mm" />
+    <None Include="..\..\src\ui-module\ui-module-mac.mm" />
+    <None Include="..\..\src\ui-window\progress-dialog-mac.mm" />
+    <None Include="..\..\src\ui-window\ui-window-mac.mm" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{3398AE5E-EE0C-4AB1-98C2-8C2B1583CE05}</ProjectGuid>
+    <RootNamespace>ioui</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>$(SolutionDir)..\..\deps\node\src;$(SolutionDir)..\..\deps\node\deps\cares\include;$(SolutionDir)..\..\deps\node\deps\debugger-agent\include;$(SolutionDir)..\..\deps\node\deps\http_parser;$(SolutionDir)..\..\deps\node\deps\mdb_v8;$(SolutionDir)..\..\deps\node\deps\openssl\openssl\include;$(SolutionDir)..\..\deps\node\deps\uv\include;$(SolutionDir)..\..\deps\node\deps\v8\include;$(SolutionDir)..\..\deps\node\deps\zlib;$(SolutionDir)..\..\deps\cef;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_UNICODE;UNICODE;WINVER=0x0602;_WIN32_WINNT=0x0602;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_UNICODE;UNICODE;WINVER=0x0602;_WIN32_WINNT=0x0602;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
