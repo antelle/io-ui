@@ -1,0 +1,532 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		484AE6181AF00B5100842B65 /* ui-window.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 484AE6171AF00B5100842B65 /* ui-window.cpp */; };
+		48ADE8951AD47CDF0062E223 /* os-main-linux.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48ADE87C1AD47CDF0062E223 /* os-main-linux.cpp */; };
+		48ADE8961AD47CDF0062E223 /* os-main-mac.mm in Sources */ = {isa = PBXBuildFile; fileRef = 48ADE87D1AD47CDF0062E223 /* os-main-mac.mm */; };
+		48ADE8971AD47CDF0062E223 /* os-main-win.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48ADE87E1AD47CDF0062E223 /* os-main-win.cpp */; };
+		48ADE8981AD47CDF0062E223 /* perf-trace-linux.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48ADE8801AD47CDF0062E223 /* perf-trace-linux.cpp */; };
+		48ADE8991AD47CDF0062E223 /* perf-trace-mac.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48ADE8811AD47CDF0062E223 /* perf-trace-mac.cpp */; };
+		48ADE89A1AD47CDF0062E223 /* perf-trace-win.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48ADE8821AD47CDF0062E223 /* perf-trace-win.cpp */; };
+		48ADE89B1AD47CDF0062E223 /* perf-trace.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48ADE8831AD47CDF0062E223 /* perf-trace.cpp */; };
+		48ADE89C1AD47CDF0062E223 /* ui-module-linux.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48ADE8861AD47CDF0062E223 /* ui-module-linux.cpp */; };
+		48ADE89D1AD47CDF0062E223 /* ui-module-mac.mm in Sources */ = {isa = PBXBuildFile; fileRef = 48ADE8871AD47CDF0062E223 /* ui-module-mac.mm */; };
+		48ADE89E1AD47CDF0062E223 /* ui-module-win.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48ADE8881AD47CDF0062E223 /* ui-module-win.cpp */; };
+		48ADE89F1AD47CDF0062E223 /* ui-module.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48ADE8891AD47CDF0062E223 /* ui-module.cpp */; };
+		48ADE8A01AD47CDF0062E223 /* ui-window-linux.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48ADE88C1AD47CDF0062E223 /* ui-window-linux.cpp */; };
+		48ADE8A11AD47CDF0062E223 /* ui-window-mac.mm in Sources */ = {isa = PBXBuildFile; fileRef = 48ADE88D1AD47CDF0062E223 /* ui-window-mac.mm */; };
+		48ADE8A21AD47CDF0062E223 /* ui-window-win.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48ADE88E1AD47CDF0062E223 /* ui-window-win.cpp */; };
+		48ADE8A41AD47CDF0062E223 /* utf8-string.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48ADE8911AD47CDF0062E223 /* utf8-string.cpp */; };
+		48ADE8A51AD47CDF0062E223 /* window-config.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 48ADE8931AD47CDF0062E223 /* window-config.cpp */; };
+		48ADE8AA1AD480860062E223 /* _third_party_main.js in Resources */ = {isa = PBXBuildFile; fileRef = 48ADE8A71AD480860062E223 /* _third_party_main.js */; };
+		48ADE8AB1AD480860062E223 /* ui.js in Resources */ = {isa = PBXBuildFile; fileRef = 48ADE8A81AD480860062E223 /* ui.js */; };
+		48ADE8AC1AD480860062E223 /* vfs.js in Resources */ = {isa = PBXBuildFile; fileRef = 48ADE8A91AD480860062E223 /* vfs.js */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		48ADE8671AD47B860062E223 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 48ADE84B1AD47B860062E223 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 48ADE8521AD47B860062E223;
+			remoteInfo = "io-ui";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		484AE6171AF00B5100842B65 /* ui-window.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "ui-window.cpp"; sourceTree = "<group>"; };
+		48ADE8531AD47B860062E223 /* io-ui.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "io-ui.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		48ADE8571AD47B860062E223 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		48ADE8661AD47B860062E223 /* io-uiTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "io-uiTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		48ADE87A1AD47CDF0062E223 /* const.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = const.h; sourceTree = "<group>"; };
+		48ADE87C1AD47CDF0062E223 /* os-main-linux.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "os-main-linux.cpp"; sourceTree = "<group>"; };
+		48ADE87D1AD47CDF0062E223 /* os-main-mac.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = "os-main-mac.mm"; sourceTree = "<group>"; };
+		48ADE87E1AD47CDF0062E223 /* os-main-win.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "os-main-win.cpp"; sourceTree = "<group>"; };
+		48ADE8801AD47CDF0062E223 /* perf-trace-linux.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "perf-trace-linux.cpp"; sourceTree = "<group>"; };
+		48ADE8811AD47CDF0062E223 /* perf-trace-mac.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "perf-trace-mac.cpp"; sourceTree = "<group>"; };
+		48ADE8821AD47CDF0062E223 /* perf-trace-win.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "perf-trace-win.cpp"; sourceTree = "<group>"; };
+		48ADE8831AD47CDF0062E223 /* perf-trace.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "perf-trace.cpp"; sourceTree = "<group>"; };
+		48ADE8841AD47CDF0062E223 /* perf-trace.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "perf-trace.h"; sourceTree = "<group>"; };
+		48ADE8861AD47CDF0062E223 /* ui-module-linux.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "ui-module-linux.cpp"; sourceTree = "<group>"; };
+		48ADE8871AD47CDF0062E223 /* ui-module-mac.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = "ui-module-mac.mm"; sourceTree = "<group>"; };
+		48ADE8881AD47CDF0062E223 /* ui-module-win.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "ui-module-win.cpp"; sourceTree = "<group>"; };
+		48ADE8891AD47CDF0062E223 /* ui-module.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "ui-module.cpp"; sourceTree = "<group>"; };
+		48ADE88A1AD47CDF0062E223 /* ui-module.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "ui-module.h"; sourceTree = "<group>"; };
+		48ADE88C1AD47CDF0062E223 /* ui-window-linux.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "ui-window-linux.cpp"; sourceTree = "<group>"; };
+		48ADE88D1AD47CDF0062E223 /* ui-window-mac.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = "ui-window-mac.mm"; sourceTree = "<group>"; };
+		48ADE88E1AD47CDF0062E223 /* ui-window-win.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "ui-window-win.cpp"; sourceTree = "<group>"; };
+		48ADE8901AD47CDF0062E223 /* ui-window.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "ui-window.h"; sourceTree = "<group>"; };
+		48ADE8911AD47CDF0062E223 /* utf8-string.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "utf8-string.cpp"; sourceTree = "<group>"; };
+		48ADE8921AD47CDF0062E223 /* utf8-string.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "utf8-string.h"; sourceTree = "<group>"; };
+		48ADE8931AD47CDF0062E223 /* window-config.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "window-config.cpp"; sourceTree = "<group>"; };
+		48ADE8941AD47CDF0062E223 /* window-config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "window-config.h"; sourceTree = "<group>"; };
+		48ADE8A71AD480860062E223 /* _third_party_main.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = _third_party_main.js; sourceTree = "<group>"; };
+		48ADE8A81AD480860062E223 /* ui.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = ui.js; sourceTree = "<group>"; };
+		48ADE8A91AD480860062E223 /* vfs.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = vfs.js; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		48ADE8501AD47B860062E223 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		48ADE8631AD47B860062E223 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		48ADE84A1AD47B860062E223 = {
+			isa = PBXGroup;
+			children = (
+				48ADE8551AD47B860062E223 /* io-ui */,
+				48ADE8541AD47B860062E223 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		48ADE8541AD47B860062E223 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				48ADE8531AD47B860062E223 /* io-ui.app */,
+				48ADE8661AD47B860062E223 /* io-uiTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		48ADE8551AD47B860062E223 /* io-ui */ = {
+			isa = PBXGroup;
+			children = (
+				48ADE8A61AD480860062E223 /* js */,
+				48ADE8791AD47CDF0062E223 /* src */,
+				48ADE8561AD47B860062E223 /* Supporting Files */,
+			);
+			path = "io-ui";
+			sourceTree = "<group>";
+		};
+		48ADE8561AD47B860062E223 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				48ADE8571AD47B860062E223 /* Info.plist */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		48ADE8791AD47CDF0062E223 /* src */ = {
+			isa = PBXGroup;
+			children = (
+				48ADE87A1AD47CDF0062E223 /* const.h */,
+				48ADE87B1AD47CDF0062E223 /* os-main */,
+				48ADE87F1AD47CDF0062E223 /* perf-trace */,
+				48ADE8851AD47CDF0062E223 /* ui-module */,
+				48ADE88B1AD47CDF0062E223 /* ui-window */,
+				48ADE8911AD47CDF0062E223 /* utf8-string.cpp */,
+				48ADE8921AD47CDF0062E223 /* utf8-string.h */,
+				48ADE8931AD47CDF0062E223 /* window-config.cpp */,
+				48ADE8941AD47CDF0062E223 /* window-config.h */,
+			);
+			name = src;
+			path = ../../../src;
+			sourceTree = "<group>";
+		};
+		48ADE87B1AD47CDF0062E223 /* os-main */ = {
+			isa = PBXGroup;
+			children = (
+				48ADE87C1AD47CDF0062E223 /* os-main-linux.cpp */,
+				48ADE87D1AD47CDF0062E223 /* os-main-mac.mm */,
+				48ADE87E1AD47CDF0062E223 /* os-main-win.cpp */,
+			);
+			path = "os-main";
+			sourceTree = "<group>";
+		};
+		48ADE87F1AD47CDF0062E223 /* perf-trace */ = {
+			isa = PBXGroup;
+			children = (
+				48ADE8801AD47CDF0062E223 /* perf-trace-linux.cpp */,
+				48ADE8811AD47CDF0062E223 /* perf-trace-mac.cpp */,
+				48ADE8821AD47CDF0062E223 /* perf-trace-win.cpp */,
+				48ADE8831AD47CDF0062E223 /* perf-trace.cpp */,
+				48ADE8841AD47CDF0062E223 /* perf-trace.h */,
+			);
+			path = "perf-trace";
+			sourceTree = "<group>";
+		};
+		48ADE8851AD47CDF0062E223 /* ui-module */ = {
+			isa = PBXGroup;
+			children = (
+				48ADE8861AD47CDF0062E223 /* ui-module-linux.cpp */,
+				48ADE8871AD47CDF0062E223 /* ui-module-mac.mm */,
+				48ADE8881AD47CDF0062E223 /* ui-module-win.cpp */,
+				48ADE8891AD47CDF0062E223 /* ui-module.cpp */,
+				48ADE88A1AD47CDF0062E223 /* ui-module.h */,
+			);
+			path = "ui-module";
+			sourceTree = "<group>";
+		};
+		48ADE88B1AD47CDF0062E223 /* ui-window */ = {
+			isa = PBXGroup;
+			children = (
+				48ADE88C1AD47CDF0062E223 /* ui-window-linux.cpp */,
+				48ADE88D1AD47CDF0062E223 /* ui-window-mac.mm */,
+				48ADE88E1AD47CDF0062E223 /* ui-window-win.cpp */,
+				484AE6171AF00B5100842B65 /* ui-window.cpp */,
+				48ADE8901AD47CDF0062E223 /* ui-window.h */,
+			);
+			path = "ui-window";
+			sourceTree = "<group>";
+		};
+		48ADE8A61AD480860062E223 /* js */ = {
+			isa = PBXGroup;
+			children = (
+				48ADE8A71AD480860062E223 /* _third_party_main.js */,
+				48ADE8A81AD480860062E223 /* ui.js */,
+				48ADE8A91AD480860062E223 /* vfs.js */,
+			);
+			name = js;
+			path = ../../../js;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		48ADE8521AD47B860062E223 /* io-ui */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 48ADE8701AD47B860062E223 /* Build configuration list for PBXNativeTarget "io-ui" */;
+			buildPhases = (
+				48ADE84F1AD47B860062E223 /* Sources */,
+				48ADE8501AD47B860062E223 /* Frameworks */,
+				48ADE8511AD47B860062E223 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "io-ui";
+			productName = "io-ui";
+			productReference = 48ADE8531AD47B860062E223 /* io-ui.app */;
+			productType = "com.apple.product-type.application";
+		};
+		48ADE8651AD47B860062E223 /* io-uiTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 48ADE8731AD47B860062E223 /* Build configuration list for PBXNativeTarget "io-uiTests" */;
+			buildPhases = (
+				48ADE8621AD47B860062E223 /* Sources */,
+				48ADE8631AD47B860062E223 /* Frameworks */,
+				48ADE8641AD47B860062E223 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				48ADE8681AD47B860062E223 /* PBXTargetDependency */,
+			);
+			name = "io-uiTests";
+			productName = "io-uiTests";
+			productReference = 48ADE8661AD47B860062E223 /* io-uiTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		48ADE84B1AD47B860062E223 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0620;
+				ORGANIZATIONNAME = IoUi;
+				TargetAttributes = {
+					48ADE8521AD47B860062E223 = {
+						CreatedOnToolsVersion = 6.2;
+					};
+					48ADE8651AD47B860062E223 = {
+						CreatedOnToolsVersion = 6.2;
+						TestTargetID = 48ADE8521AD47B860062E223;
+					};
+				};
+			};
+			buildConfigurationList = 48ADE84E1AD47B860062E223 /* Build configuration list for PBXProject "io-ui" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 48ADE84A1AD47B860062E223;
+			productRefGroup = 48ADE8541AD47B860062E223 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				48ADE8521AD47B860062E223 /* io-ui */,
+				48ADE8651AD47B860062E223 /* io-uiTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		48ADE8511AD47B860062E223 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				48ADE8AB1AD480860062E223 /* ui.js in Resources */,
+				48ADE8AC1AD480860062E223 /* vfs.js in Resources */,
+				48ADE8AA1AD480860062E223 /* _third_party_main.js in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		48ADE8641AD47B860062E223 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		48ADE84F1AD47B860062E223 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				48ADE8A01AD47CDF0062E223 /* ui-window-linux.cpp in Sources */,
+				48ADE8961AD47CDF0062E223 /* os-main-mac.mm in Sources */,
+				48ADE8A21AD47CDF0062E223 /* ui-window-win.cpp in Sources */,
+				48ADE8971AD47CDF0062E223 /* os-main-win.cpp in Sources */,
+				48ADE89E1AD47CDF0062E223 /* ui-module-win.cpp in Sources */,
+				48ADE89C1AD47CDF0062E223 /* ui-module-linux.cpp in Sources */,
+				48ADE89B1AD47CDF0062E223 /* perf-trace.cpp in Sources */,
+				48ADE8A51AD47CDF0062E223 /* window-config.cpp in Sources */,
+				48ADE8991AD47CDF0062E223 /* perf-trace-mac.cpp in Sources */,
+				48ADE89D1AD47CDF0062E223 /* ui-module-mac.mm in Sources */,
+				484AE6181AF00B5100842B65 /* ui-window.cpp in Sources */,
+				48ADE8951AD47CDF0062E223 /* os-main-linux.cpp in Sources */,
+				48ADE8A41AD47CDF0062E223 /* utf8-string.cpp in Sources */,
+				48ADE8981AD47CDF0062E223 /* perf-trace-linux.cpp in Sources */,
+				48ADE89F1AD47CDF0062E223 /* ui-module.cpp in Sources */,
+				48ADE89A1AD47CDF0062E223 /* perf-trace-win.cpp in Sources */,
+				48ADE8A11AD47CDF0062E223 /* ui-window-mac.mm in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		48ADE8621AD47B860062E223 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		48ADE8681AD47B860062E223 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 48ADE8521AD47B860062E223 /* io-ui */;
+			targetProxy = 48ADE8671AD47B860062E223 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		48ADE86E1AD47B860062E223 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+					"deps/node/src",
+					"deps/node/deps/cares/include",
+					"deps/node/deps/debugger-agent/include",
+					"deps/node/deps/http_parser",
+					"deps/node/deps/mdb_v8",
+					"deps/node/deps/openssl/openssl/include",
+					"deps/node/deps/uv/include",
+					"deps/node/deps/v8/include",
+					"deps/node/deps/zlib",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		48ADE86F1AD47B860062E223 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+					"deps/node/src",
+					"deps/node/deps/cares/include",
+					"deps/node/deps/debugger-agent/include",
+					"deps/node/deps/http_parser",
+					"deps/node/deps/mdb_v8",
+					"deps/node/deps/openssl/openssl/include",
+					"deps/node/deps/uv/include",
+					"deps/node/deps/v8/include",
+					"deps/node/deps/zlib",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		48ADE8711AD47B860062E223 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = "io-ui/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		48ADE8721AD47B860062E223 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = "io-ui/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+		48ADE8741AD47B860062E223 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(DEVELOPER_FRAMEWORKS_DIR)",
+					"$(inherited)",
+				);
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = "io-uiTests/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/io-ui.app/Contents/MacOS/io-ui";
+			};
+			name = Debug;
+		};
+		48ADE8751AD47B860062E223 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(DEVELOPER_FRAMEWORKS_DIR)",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = "io-uiTests/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/io-ui.app/Contents/MacOS/io-ui";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		48ADE84E1AD47B860062E223 /* Build configuration list for PBXProject "io-ui" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				48ADE86E1AD47B860062E223 /* Debug */,
+				48ADE86F1AD47B860062E223 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		48ADE8701AD47B860062E223 /* Build configuration list for PBXNativeTarget "io-ui" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				48ADE8711AD47B860062E223 /* Debug */,
+				48ADE8721AD47B860062E223 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		48ADE8731AD47B860062E223 /* Build configuration list for PBXNativeTarget "io-uiTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				48ADE8741AD47B860062E223 /* Debug */,
+				48ADE8751AD47B860062E223 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 48ADE84B1AD47B860062E223 /* Project object */;
+}

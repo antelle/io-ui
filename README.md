@@ -28,4 +28,4 @@ Other build scripts:
 - `build-examples.js` - build examples
 
 ## IDEs
-For now there are no projects because they are not ready-to-public. To edit the code, you can use XCode on Mac OS X, Visual Studio 2013 Community on Windows and CodeLite on Ubuntu, it works ok. Later, projects will be posted.
+To edit the code, you can use XCode on Mac OS X, Visual Studio 2013 Community on Windows and CodeLite on Ubuntu, it works ok. Project files are in project folder.
