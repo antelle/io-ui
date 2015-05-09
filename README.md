@@ -2,9 +2,6 @@
 This readme describes how to work with sources. For general and usage info, please go to:  
 [antelle.github.io/io-ui](http://antelle.github.io/io-ui)
 
-## Warning
-The project is being developed.
-
 ## Building
 Prerequisties:
   
