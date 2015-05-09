@@ -6,6 +6,7 @@
 #include "ui-module.h"
 #include "../ui-window/ui-window.h"
 #include "../perf-trace/perf-trace.h"
+#include "../version.h"
 
 using namespace v8;
 
