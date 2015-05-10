@@ -2,7 +2,8 @@
 
 #include <node.h>
 #include <uv.h>
-#include <iostream>
+#include <string.h>
+#include <cstdlib>
 #include "ui-module.h"
 #include "../ui-window/ui-window.h"
 #include "../perf-trace/perf-trace.h"

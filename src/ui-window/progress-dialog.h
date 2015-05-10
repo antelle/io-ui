@@ -22,7 +22,7 @@ protected:
 
     Utf8String* _title = NULL;
     v8::Persistent<v8::Function> _closed;
-    int _value = NULL;
+    int _value = 0;
     Utf8String* _text = NULL;
 private:
     static void Init();
