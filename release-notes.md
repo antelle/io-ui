@@ -1,7 +1,7 @@
 Release notes
 -------------
 
-##### v0.1.0 (2015-05-11)
+##### v0.1.0 (2015-05-10)
 
 New features and bugfixes
 
