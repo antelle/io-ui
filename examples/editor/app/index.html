@@ -7,7 +7,7 @@
     </head>
     <body style="">
         <div id="editor" style="position: absolute; top: 0; right: 0; bottom: 0; left: 0;">// enter some code and hit F5 to run. you can test window methods here
-app.window.frame = !app.window.frame;</div>
+app.window.top += 5;</div>
         <script src="bower_components/jquery/dist/jquery.min.js" type="text/javascript" charset="utf-8"></script>
         <script src="bower_components/ace-builds/src-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
         <script>
@@ -35,6 +35,17 @@ app.window.frame = !app.window.frame;</div>
                 readOnly: false
             });
             editor.focus();
+
+            window.backend.onMessage = function(msg) {
+                switch (msg.cmd) {
+                    case 'set-text':
+                        editor.setValue(msg.text);
+                        editor.clearSelection();
+                        break;
+                    case 'get-text':
+                        return editor.getValue();
+                }
+            };
 
             function setResult(res) {
                 var code = editor.getValue().replace(/\n\n\/\/[^\n]+$/, '');

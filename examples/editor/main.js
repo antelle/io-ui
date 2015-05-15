@@ -1,4 +1,5 @@
-var ui = require('ui');
+var ui = require('ui'),
+    fs = require('fs');
 var app = ui.run({
     url: '/',
     server: {
@@ -15,7 +16,23 @@ var app = ui.run({
         topmost: false,
         opacity: 1,
         state: ui.Window.STATE_NORMAL,
-        menu: []
+        menu: [
+            {
+                title: '&File', items: [
+                    { title: '&Open', callback: openFile },
+                    { title: '&Save As', callback: saveFileAs }
+                ]
+            },
+            { title: '&Edit' },
+            { title: '&Help', items: [
+                    { title: 'Examples', items: [
+                        { title: 'window.top', id: 'ex-win-top', callback: setExample },
+                        { title: 'window.left', id: 'ex-win-left', callback: setExample },
+                        { title: 'process.exit', id: 'ex-process-exit', callback: setExample }
+                    ] }
+                ]
+            }
+        ]
     }
 });
 app.server.backend = function (req, res) {
@@ -43,3 +60,50 @@ app.server.backend = function (req, res) {
         throw 'err';
     }
 };
+
+function setExample(id) {
+    var code = '// hit F5 to run this example\n';
+    switch (id) {
+        case 'ex-win-top':
+            code += 'app.window.top += 5;';
+            break;
+        case 'ex-win-left':
+            code += 'app.window.left += 5;';
+            break;
+        case 'ex-process-exit':
+            code += 'process.exit(0);';
+            break;
+        default:
+            return;
+    }
+    app.window.postMessage({ cmd: 'set-text', text: code });
+}
+
+function openFile() {
+    app.window.selectFile({
+        open: true,
+        title: 'Select a file',
+        ext: ['txt', 'js', 'html', 'css', 'md', '*'],
+        complete: function(files) {
+            if (files && files[0]) {
+                var content = fs.readFileSync(files[0], 'utf8');
+                app.window.postMessage({ cmd: 'set-text', text: content });
+            }
+        }
+    });
+}
+
+function saveFileAs() {
+    app.window.selectFile({
+        open: false,
+        title: 'Select a file',
+        ext: ['txt', '*'],
+        complete: function(files) {
+            if (files && files[0]) {
+                app.window.postMessage({ cmd: 'get-text' }, function(content) {
+                    fs.writeFileSync(files[0], content, 'utf8');
+                });
+            }
+        }
+    });
+}

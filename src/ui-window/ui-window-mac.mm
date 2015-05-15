@@ -541,7 +541,7 @@ void UiWindowMac::AddMenu(UiMenu* menu, NSMenu* parentMenu) {
         NSString* keyEquivalent = @"";
         if (range.location != NSNotFound && range.location < title.length - 1) {
             range.location++;
-            keyEquivalent = [title substringWithRange:range];
+            keyEquivalent = [[title substringWithRange:range] lowercaseString];
             title = [title stringByReplacingOccurrencesOfString:@"&" withString:@""];
         }
         bool isEdit = [title isEqualToString:@"Edit"];
