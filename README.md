@@ -1,6 +1,6 @@
 ## Warning!
 
-The project has been created as a commercial project, and also as a proof-of-concept. Project author doesn't have active interest in this project, and it's not being actively developed for now, until there's no extra demand and finance for such specific kind of tool.
+The project has been created as a commercial product, and also as a proof-of-concept. The author doesn't have active interest in this project, and it's not being actively developed for now, until there's any extra demand and finance for such specific kind of tool.
 
 ## Project website
 This readme describes how to work with sources. For general and usage info, please go to:  
